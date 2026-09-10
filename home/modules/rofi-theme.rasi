@@ -1,0 +1,233 @@
+* {
+    bg-col: #14141b;
+    bg-col-light: #1c1c26;
+    border-col: #a78bfa;
+    selected-col: #25252f;
+    text-col: #c8c8d4;
+    subtext-col: #8b8b9a;
+    urgent-col: #f472b6;
+    accent: #c4b5fd;
+    font: "JetBrainsMono Nerd Font 11";
+
+    /* Override Rofi 2.0 internal variables.
+       NOTE: literal hex values — rofi does NOT resolve var() chains
+       inside variable definitions, so `background: var(bg-col)` breaks. */
+    background: #14141b;
+    foreground: #c8c8d4;
+    lightbg: #25252f;
+    lightfg: #8b8b9a;
+    red: #f472b6;
+    blue: #a78bfa;
+    green: #c4b5fd;
+    yellow: #c4b5fd;
+
+    normal-background: #14141b;
+    normal-foreground: #c8c8d4;
+    urgent-background: #14141b;
+    urgent-foreground: #f472b6;
+    active-background: #14141b;
+    active-foreground: #c4b5fd;
+
+    selected-normal-background: #25252f;
+    selected-normal-foreground: #c4b5fd;
+    selected-urgent-background: #f472b6;
+    selected-urgent-foreground: #14141b;
+    selected-active-background: #a78bfa;
+    selected-active-foreground: #14141b;
+
+    alternate-normal-background: #14141b;
+    alternate-normal-foreground: #c8c8d4;
+    alternate-urgent-background: #14141b;
+    alternate-urgent-foreground: #f472b6;
+    alternate-active-background: #14141b;
+    alternate-active-foreground: #c4b5fd;
+}
+
+window {
+    width: 520px;
+    border: 2px solid;
+    border-color: @border-col;
+    border-radius: 14px;
+    background-color: @bg-col;
+    padding: 14px;
+}
+
+/* mainbox paints the spacing gaps between children — without an explicit
+   background it renders rofi's built-in white as thin strips */
+mainbox {
+    background-color: @bg-col;
+    spacing: 6px;
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    background-color: @bg-col-light;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 0px 0px 12px 0px;
+    border: 1px solid;
+    border-color: @selected-col;
+}
+
+prompt {
+    background-color: @bg-col-light;
+    text-color: @border-col;
+    padding: 0px 10px 0px 0px;
+    font-weight: bold;
+}
+
+entry {
+    background-color: @bg-col-light;
+    text-color: @text-col;
+    placeholder: "Search...";
+    placeholder-color: @subtext-col;
+}
+
+listview {
+    columns: 1;
+    lines: 8;
+    cycle: true;
+    dynamic: true;
+    scrollbar: false;
+    margin: 0px;
+    background-color: @bg-col;
+}
+
+element {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background-color: @bg-col;
+    text-color: @text-col;
+    spacing: 10px;
+}
+
+/* explicit state blocks — direct @-references always resolve */
+element normal.normal {
+    background-color: @bg-col;
+    text-color: @text-col;
+}
+element normal.urgent {
+    background-color: @bg-col;
+    text-color: @urgent-col;
+}
+element normal.active {
+    background-color: @bg-col;
+    text-color: @accent;
+}
+
+element selected {
+    background-color: @selected-col;
+    text-color: @accent;
+    border: 1px solid;
+    border-color: @border-col;
+}
+element selected.normal {
+    background-color: @selected-col;
+    text-color: @accent;
+}
+element selected.urgent {
+    background-color: @urgent-col;
+    text-color: @bg-col;
+}
+element selected.active {
+    background-color: @border-col;
+    text-color: @bg-col;
+}
+
+element alternate.normal {
+    background-color: @bg-col;
+    text-color: @text-col;
+}
+element alternate.urgent {
+    background-color: @bg-col;
+    text-color: @urgent-col;
+}
+element alternate.active {
+    background-color: @bg-col;
+    text-color: @accent;
+}
+
+element-icon {
+    size: 22px;
+    margin: 0px 10px 0px 0px;
+    background-color: transparent;
+}
+
+element-text {
+    vertical-align: 0.5;
+    background-color: transparent;
+    text-color: inherit;
+}
+
+/* sidebar / mode switcher (Apps / Windows / Run) — explicit background
+   required: rofi's built-in default falls back to white otherwise */
+sidebar {
+    background-color: @bg-col-light;
+    border: 1px solid;
+    border-color: @selected-col;
+    border-radius: 10px;
+    margin: 12px 0px 0px 0px;
+    padding: 6px;
+}
+
+mode-switcher {
+    background-color: @bg-col-light;
+    border: 1px solid;
+    border-color: @selected-col;
+    border-radius: 10px;
+    margin: 12px 0px 0px 0px;
+    padding: 6px;
+}
+
+button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    background-color: @bg-col-light;
+    text-color: @subtext-col;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button selected {
+    background-color: @border-col;
+    text-color: @bg-col;
+}
+
+sidebar button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    background-color: @bg-col-light;
+    text-color: @subtext-col;
+    font-weight: bold;
+}
+
+sidebar button selected {
+    background-color: @border-col;
+    text-color: @bg-col;
+}
+
+/* message / error box */
+message {
+    background-color: @bg-col-light;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 0px 0px 12px 0px;
+    border: 1px solid;
+    border-color: @urgent-col;
+}
+
+message-text {
+    text-color: @urgent-col;
+    background-color: @bg-col-light;
+}
+
+textbox {
+    text-color: @subtext-col;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: @selected-col;
+}
+
+mode-switcher {
+    margin: 12px 0px 0px 0px;
+}

@@ -1,0 +1,21 @@
+# Nix build outputs
+result
+result-*
+
+# Flake lock backups / temporary files
+*.lock.bak
+
+# Editor / OS
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
+
+# Direnv
+.envrc
+.direnv/
+
+# Local state that should not be committed
+*.log
