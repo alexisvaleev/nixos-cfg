@@ -40,6 +40,9 @@ in
         hl.exec_cmd("nm-applet --indicator")
         hl.exec_cmd("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1")
         hl.exec_cmd("TgWsProxy")
+        -- Lock the session immediately on autologin (hypridle handles idle timeouts later).
+        -- The pidof guard prevents re-locking on `hyprctl reload`.
+        hl.exec_cmd("pidof hyprlock >/dev/null 2>&1 || hyprlock")
     end)
 
     -------------------------------
