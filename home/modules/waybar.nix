@@ -12,7 +12,7 @@ let
     volMute    = nf "f00d";  # nf-fa-xmark
     # network
     wifi       = nf "f1eb";  # nf-fa-wifi
-    ethernet   = nf "f06a0"; # nf-md-ethernet_cable
+    ethernet   = nf "f1e6";  # nf-fa-plug (wired)
     wifiOff    = nf "f072";  # nf-fa-signal_off
     # bluetooth
     btOff      = nf "f293";  # nf-fa-bluetooth_b
@@ -162,7 +162,7 @@ in
 
     style = ''
       * {
-          font-family: "Inter", "JetBrainsMono Nerd Font", "Noto Sans";
+          font-family: "Inter", "JetBrainsMono Nerd Font Propo", "JetBrainsMono Nerd Font", "Noto Sans";
           font-size: 12px;
           border: none;
           border-radius: 0;
@@ -183,6 +183,12 @@ in
           margin: 0;
           background-color: transparent;
           color: ${theme.text};
+          min-height: 28px;
+      }
+
+      #custom-logo, #pulseaudio, #network, #bluetooth, #battery,
+      #custom-control, #custom-power, #hyprland-language {
+          font-family: "JetBrainsMono Nerd Font Propo", "Inter", "Noto Sans";
       }
 
       #workspaces {
@@ -231,7 +237,7 @@ in
 
       #custom-logo {
           color: ${theme.purple};
-          font-size: 15px;
+          font-size: 16px;
           padding-left: 18px;
           padding-right: 6px;
       }
@@ -255,8 +261,8 @@ in
       #battery.warning { color: ${theme.yellow}; }
       #battery.critical { color: ${theme.red}; }
       #battery.charging { color: ${theme.green}; }
-      #custom-control { color: ${theme.subtext}; }
-      #custom-power { color: ${theme.red}; }
+      #custom-control { color: ${theme.subtext}; font-size: 13px; }
+      #custom-power { color: ${theme.red}; font-size: 13px; }
 
       #tray { background-color: transparent; }
 
@@ -274,7 +280,8 @@ in
       #battery:hover,
       #custom-control:hover,
       #tray:hover,
-      #clock:hover {
+      #clock:hover,
+      #hyprland-language:hover {
           background-color: ${theme.surface2};
           border-radius: 4px;
       }
