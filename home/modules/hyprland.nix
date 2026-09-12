@@ -8,7 +8,9 @@ let
 in
 {
   # ─── Hyprland Lua config ───────────────────────────────────────────
-  xdg.configFile."hypr/hyprland.lua".text = ''
+  xdg.configFile."hypr/hyprland.lua" = {
+    force = true;
+    text = ''
     -- blessed's Hyprland config (managed by Home Manager)
 
     ------------------
@@ -33,16 +35,9 @@ in
     ---- AUTOSTART ----
     -------------------
     hl.on("hyprland.start", function()
-        hl.exec_cmd("waybar")
-        hl.exec_cmd("hyprpaper")
-        hl.exec_cmd("hypridle")
-        hl.exec_cmd("GSK_RENDERER=cairo swaync")
-        hl.exec_cmd("nm-applet --indicator")
-        hl.exec_cmd("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1")
-        hl.exec_cmd("TgWsProxy")
-        -- Lock the session immediately on autologin (hypridle handles idle timeouts later).
-        -- The pidof guard prevents re-locking on `hyprctl reload`.
-        hl.exec_cmd("pidof hyprlock >/dev/null 2>&1 || hyprlock")
+        -- One wrapper script avoids the 50 ms Lua event guard, lets us
+        -- control ordering, and gives us a log for debugging.
+        hl.exec_cmd("~/.config/hypr/scripts/autostart.sh")
     end)
 
     -------------------------------
@@ -289,7 +284,56 @@ in
         ignore_alpha = 0.2,
     })
 
-  '';
+    '';
+  };
+
+  # ─── Autostart wrapper ─────────────────────────────────────────────
+  # hyprland.start has a ~50 ms Lua guard, and some daemons need the
+  # logind session / D-Bus to be fully ready.  A small bash script lets
+  # us start them in the right order with a short delay and a log.
+  xdg.configFile."hypr/scripts/autostart.sh" = {
+    force = true;
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      LOG=/tmp/hypr-autostart.log
+      >> "$LOG"
+      exec >>"$LOG" 2>&1
+      echo "[$(date +%Y-%m-%d\ %H:%M:%S)] autostart begin"
+
+      # Things that can start immediately.
+      nohup waybar                              >/dev/null 2>&1 &
+      nohup hyprpaper                           >/dev/null 2>&1 &
+      nohup nm-applet --indicator               >/dev/null 2>&1 &
+      nohup GSK_RENDERER=cairo swaync           >/dev/null 2>&1 &
+      nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
+      if command -v TgWsProxy >/dev/null 2>&1; then
+          nohup TgWsProxy                       >/dev/null 2>&1 &
+      fi
+
+      # hypridle needs the logind session to be registered, which happens
+      # slightly after Hyprland is fully up.  Wait a bit, start it, then
+      # give it a moment to connect to the session-lock notify protocol
+      # before we trigger the initial lock.
+      (
+          sleep 2
+          nohup hypridle >/tmp/hypridle-autostart.log 2>&1 &
+
+          # Wait for hypridle to actually be running (up to ~2s).
+          for i in 1 2 3 4; do
+              sleep 0.5
+              pidof hypridle >/dev/null 2>&1 && break
+          done
+
+          # Lock once.  The pidof guard prevents re-locking on reload.
+          if ! pidof hyprlock >/dev/null 2>&1; then
+              nohup hyprlock >/tmp/hyprlock-autostart.log 2>&1 &
+          fi
+      ) &
+
+      echo "[$(date +%Y-%m-%d\ %H:%M:%S)] autostart dispatch done"
+    '';
+  };
 
   # ─── Screenshot helper script ──────────────────────────────────────
   xdg.configFile."hypr/scripts/screenshot.sh" = {

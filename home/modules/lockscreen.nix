@@ -72,17 +72,27 @@ in
     };
   };
 
-  xdg.configFile."hypr/hypridle.conf".text = ''
+  xdg.configFile."hypr/hypridle.conf" = {
+    force = true;
+    text = ''
     general {
-        after_sleep_cmd = hyprctl dispatch 'hl.dsp.dpms({action="on"})'
-        before_sleep_cmd = hyprlock
+        # Run through loginctl so hypridle can wait until the session is
+        # actually locked before allowing the system to sleep.
+        lock_cmd = pidof hyprlock >/dev/null 2>&1 || hyprlock
+        before_sleep_cmd = loginctl lock-session
+        # After resume, cycle DPMS off/on to force Hyprland to re-grant
+        # keyboard focus to the existing hyprlock surface. Without this the
+        # lock screen often shows the clock but ignores typing until the
+        # display is cycled.
+        after_sleep_cmd = hyprctl dispatch 'hl.dsp.dpms({action="off"})' && sleep 0.5 && hyprctl dispatch 'hl.dsp.dpms({action="on"})'
         ignore_dbus_inhibit = false
-        lock_cmd = pidof hyprlock || hyprlock
+        ignore_systemd_inhibit = false
+        inhibit_sleep = 3
     }
 
     listener {
         timeout = 600
-        on-timeout = hyprlock
+        on-timeout = loginctl lock-session
         ignore_inhibit = true
     }
 
@@ -92,4 +102,5 @@ in
         on-resume = hyprctl dispatch 'hl.dsp.dpms({action="on"})'
     }
   '';
+  };
 }

@@ -22,7 +22,8 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
+            home-manager.backupFileExtension = "nix-hm-backup";
+            home-manager.overwriteBackup = true;
             home-manager.users.blessed = import ./home;
             home-manager.extraSpecialArgs = { inherit inputs; };
           }
