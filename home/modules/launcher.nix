@@ -10,7 +10,7 @@
     extraConfig = {
       modi = "drun,window,run";
       show-icons = true;
-      icon-theme = "Adwaita";
+      icon-theme = "Papirus-Dark";
       drun-display-format = "{name}";
       window-format = "{w}  ·  {c}  ·  {t}";
       display-drun = "Apps";

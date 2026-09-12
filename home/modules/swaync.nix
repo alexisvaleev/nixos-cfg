@@ -141,45 +141,11 @@ in
 
   xdg.configFile."swaync/config.json".text = builtins.toJSON cfg;
 
-  xdg.configFile."swaync/style.css".text = with theme; ''
-    :root {
-      --cc-bg: rgba(20, 20, 27, 0.9);
-      --noti-border-color: rgba(167, 139, 250, 0.2);
-      --noti-bg: 28, 28, 38;
-      --noti-bg-alpha: 0.95;
-      --noti-bg-darker: rgb(28, 28, 38);
-      --noti-bg-hover: rgb(37, 37, 47);
-      --noti-bg-focus: rgba(167, 139, 250, 0.2);
-      --noti-close-bg: rgb(60, 60, 70);
-      --noti-close-bg-hover: rgb(244, 114, 182);
-      --text-color: ${text};
-      --text-color-disabled: ${subtext};
-      --bg-selected: ${purple};
-      --notification-icon-size: 48px;
-      --notification-app-icon-size: 16px;
-      --notification-group-icon-size: 32px;
-      --border: 1px solid var(--noti-border-color);
-      --border-radius: 12px;
-      --font-size-body: 13px;
-      --font-size-summary: 14px;
-      --widget-volume-row-icon-size: 22px;
-    }
-
-    @define-color cc-bg rgba(20, 20, 27, 0.9);
-    @define-color noti-border-color rgba(167, 139, 250, 0.2);
-    @define-color noti-bg rgba(28, 28, 38, 0.95);
-    @define-color noti-bg-opaque rgb(28, 28, 38);
-    @define-color noti-bg-darker rgb(28, 28, 38);
-    @define-color noti-bg-hover rgb(37, 37, 47);
-    @define-color noti-bg-focus rgba(167, 139, 250, 0.2);
-    @define-color noti-close-bg rgb(60, 60, 70);
-    @define-color noti-close-bg-hover rgb(244, 114, 182);
-    @define-color text-color ${text};
-    @define-color text-color-disabled ${subtext};
-    @define-color bg-selected ${purple};
+  xdg.configFile."swaync/style.css".text = ''
+    @import "/home/blessed/.config/theme/colors.css";
 
     * {
-      font-family: "Inter", "JetBrainsMono Nerd Font", "Noto Sans";
+      font-family: "Inter", "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Noto Sans";
       font-size: 13px;
     }
 
@@ -188,10 +154,10 @@ in
     }
 
     .control-center {
-      background: var(--cc-bg);
-      color: var(--text-color);
-      border-radius: var(--border-radius);
-      border: var(--border);
+      background: alpha(@bg, 0.9);
+      color: @text;
+      border-radius: 10px;
+      border: 1px solid alpha(@purple, 0.2);
       padding: 8px;
     }
 
@@ -202,8 +168,8 @@ in
     .widget {
       margin: 6px;
       padding: 10px;
-      border-radius: var(--border-radius);
-      background: rgba(var(--noti-bg), var(--noti-bg-alpha));
+      border-radius: 10px;
+      background: alpha(@surface, 0.95);
     }
 
     .widget-title > label {
@@ -213,26 +179,26 @@ in
 
     .widget-title > button {
       margin-left: 8px;
-      border-radius: var(--border-radius);
-      background: ${surface};
-      color: ${text};
+      border-radius: 10px;
+      background: @surface;
+      color: @text;
     }
 
     .widget-title > button:hover {
-      background: ${surface2};
+      background: @surface2;
     }
 
     .widget-dnd label {
-      color: var(--text-color);
+      color: @text;
       font-weight: 500;
     }
 
     .widget-dnd switch {
-      border-radius: var(--border-radius);
+      border-radius: 10px;
     }
 
     .widget-dnd switch:checked {
-      background: ${purple};
+      background: @purple;
     }
 
     .widget-buttons-grid {
@@ -241,10 +207,10 @@ in
 
     .widget-buttons-grid > flowbox > flowboxchild > button {
       background: none;
-      background-color: ${surface};
-      color: ${text};
+      background-color: @surface;
+      color: @text;
       border: 1px solid transparent;
-      border-radius: var(--border-radius);
+      border-radius: 10px;
       padding: 8px;
       margin: 2px;
       min-width: 0;
@@ -253,19 +219,19 @@ in
     }
 
     .widget-buttons-grid > flowbox > flowboxchild > button:hover {
-      background-color: ${surface2};
-      border-color: rgba(167, 139, 250, 0.28);
+      background-color: @surface2;
+      border-color: alpha(@purple, 0.28);
     }
 
     .widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
-      background-color: ${purple};
-      color: ${bg};
-      border-color: rgba(167, 139, 250, 0.55);
+      background-color: @purple;
+      color: @bg;
+      border-color: alpha(@purple, 0.55);
     }
 
     .widget-volume scale trough,
     .widget-backlight scale trough {
-      background-color: ${surface2};
+      background-color: @surface2;
       border-radius: 999px;
       min-height: 8px;
       margin: 4px 0;
@@ -273,49 +239,49 @@ in
 
     .widget-volume scale highlight,
     .widget-backlight scale highlight {
-      background-color: ${purple};
+      background-color: @purple;
       border-radius: 999px;
     }
 
     .widget-volume scale slider,
     .widget-backlight scale slider {
-      background: ${text};
+      background: @text;
       border-radius: 999px;
       min-width: 14px;
       min-height: 14px;
     }
 
     .per-app-volume {
-      background-color: ${surface};
+      background-color: @surface;
       margin: 8px 0 0;
-      border-radius: var(--border-radius);
+      border-radius: 10px;
       padding: 8px;
     }
 
     .widget-mpris .widget-mpris-player {
-      border-radius: var(--border-radius);
+      border-radius: 10px;
     }
 
     .notification-row .notification-background .notification {
-      border-radius: var(--border-radius);
-      border: var(--border);
-      background: rgba(var(--noti-bg), var(--noti-bg-alpha));
-      color: var(--text-color);
+      border-radius: 10px;
+      border: 1px solid alpha(@purple, 0.2);
+      background: alpha(@surface, 0.95);
+      color: @text;
     }
 
     .notification-row .notification-background .notification .notification-default-action:hover {
-      background: var(--noti-bg-hover);
+      background: alpha(@surface3, 0.95);
     }
 
     .close-button {
-      background: var(--noti-close-bg);
-      color: var(--text-color);
+      background: @surface3;
+      color: @text;
       border-radius: 100%;
     }
 
     .close-button:hover {
-      background: var(--noti-close-bg-hover);
-      color: ${bg};
+      background: @red;
+      color: @bg;
     }
   '';
 

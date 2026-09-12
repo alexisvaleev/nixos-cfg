@@ -8,14 +8,14 @@ in
     enable = true;
 
     font = {
-      name = "JetBrainsMono Nerd Font";
+      name = "Iosevka Nerd Font";
       size = 11;
     };
 
     settings = with theme; {
       # window
-      background_opacity = "0.88";
-      window_padding_width = "10";
+      background_opacity = "0.9";
+      window_padding_width = "12";
       window_margin_width = "0";
       hide_window_decorations = "yes";
       confirm_os_window_close = "0";

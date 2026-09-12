@@ -2,9 +2,6 @@
 { config, pkgs, lib, ... }:
 let
   theme = import ./theme.nix;
-  hx = c: lib.strings.removePrefix "#" c;
-  rgba = c: a: "rgba(${hx c}${a})";
-  wall = "${config.home.homeDirectory}/.local/share/backgrounds/wallpaper.jpg";
 in
 {
   # ─── Hyprland Lua config ───────────────────────────────────────────
@@ -51,17 +48,36 @@ in
     -----------------------
     ---- LOOK AND FEEL ----
     -----------------------
+    local function load_colors()
+        local path = "${config.home.homeDirectory}/.config/theme/colors.lua"
+        if dofile then
+            local ok, c = pcall(dofile, path)
+            if ok and type(c) == "table" then return c end
+        end
+        return {
+            bg = "${theme.bg}", bg_dark = "${theme.bg_dark}",
+            surface = "${theme.surface}", surface2 = "${theme.surface2}", surface3 = "${theme.surface3}",
+            text = "${theme.text}", subtext = "${theme.subtext}", muted = "${theme.muted}",
+            purple = "${theme.purple}", mauve = "${theme.mauve}", deep = "${theme.deep}",
+            magenta = "${theme.magenta}", green = "${theme.green}", red = "${theme.red}",
+            yellow = "${theme.yellow}", blue = "${theme.blue}", orange = "${theme.orange}", teal = "${theme.teal}",
+            accent = "${theme.accent}", accent2 = "${theme.accent2}",
+        }
+    end
+    local colors = load_colors()
+    local function rgba(c, a) return "rgba(" .. (c:gsub("#","")) .. a .. ")" end
+
     hl.config({
         cursor = {
             no_hardware_cursors = true,
         },
         general = {
-            gaps_in  = 5,
-            gaps_out = 20,
+            gaps_in  = 4,
+            gaps_out = 16,
             border_size = 2,
             col = {
-                active_border   = { colors = {"${rgba theme.purple "ee"}", "${rgba theme.deep "ee"}"}, angle = 45 },
-                inactive_border = "${rgba theme.surface2 "aa"}",
+                active_border   = { colors = { rgba(colors.accent, "ee"), rgba(colors.deep, "ee") }, angle = 45 },
+                inactive_border = rgba(colors.surface2, "aa"),
             },
             resize_on_border = false,
             allow_tearing = false,
@@ -69,7 +85,7 @@ in
         },
 
         decoration = {
-            rounding       = 12,
+            rounding       = 10,
             rounding_power = 2,
             active_opacity   = 1.0,
             inactive_opacity = 0.95,
@@ -77,7 +93,7 @@ in
                 enabled      = true,
                 range        = 4,
                 render_power = 3,
-                color        = ${theme.bg0},
+                color        = rgba(colors.bg, "ee"),
             },
             blur = {
                 enabled   = true,
@@ -100,22 +116,23 @@ in
     hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
     hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
 
-    hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
-    hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
-    hl.animation({ leaf = "windows",       enabled = true,  speed = 4.79, spring = "easy" })
-    hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 4.1,  spring = "easy",         style = "popin 87%" })
-    hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 1.49, bezier = "linear",       style = "popin 87%" })
-    hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.73, bezier = "almostLinear" })
-    hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.46, bezier = "almostLinear" })
-    hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "quick" })
-    hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
+    hl.animation({ leaf = "global",        enabled = true,  speed = 8,    bezier = "default" })
+    hl.animation({ leaf = "border",        enabled = true,  speed = 5,    bezier = "easeOutQuint" })
+    hl.animation({ leaf = "windows",       enabled = true,  speed = 5,    bezier = "easeOutQuint", style = "popin 80%" })
+    hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 5,    bezier = "easeOutQuint", style = "popin 80%" })
+    hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 4,    bezier = "easeOutQuint", style = "popin 80%" })
+    hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.8,  bezier = "almostLinear" })
+    hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.5,  bezier = "almostLinear" })
+    hl.animation({ leaf = "fade",          enabled = true,  speed = 3,    bezier = "quick" })
+    hl.animation({ leaf = "layers",        enabled = true,  speed = 4,    bezier = "easeOutQuint" })
     hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    bezier = "easeOutQuint", style = "fade" })
-    hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.5,  bezier = "linear",       style = "fade" })
-    hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "almostLinear" })
-    hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "almostLinear" })
-    hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
-    hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
-    hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+    hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.6,  bezier = "linear",       style = "fade" })
+    hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.8,  bezier = "almostLinear" })
+    hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.4,  bezier = "almostLinear" })
+    hl.animation({ leaf = "workspaces",    enabled = true,  speed = 2,    bezier = "almostLinear", style = "slidefade 20%" })
+    hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.4,  bezier = "almostLinear", style = "slidefade 20%" })
+    hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 2,    bezier = "almostLinear", style = "slidefade 20%" })
+    hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 5,  bezier = "easeOutQuint", style = "slidefadevert 20%" })
     hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "quick" })
 
     ------------------
@@ -207,7 +224,13 @@ in
     hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("~/.config/rofi/powermenu.sh"))
 
     -- control center (SwayNC)
-    hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("swaync-client -t"))
+    hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("${pkgs.swaynotificationcenter}/bin/swaync-client -t"))
+    hl.bind(mainMod .. " + N",         hl.dsp.exec_cmd("${pkgs.swaynotificationcenter}/bin/swaync-client -t -sw"))
+
+    -- clipboard history + emoji picker + wallpaper picker
+    hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("~/.config/hypr/scripts/clipboard.sh"))
+    hl.bind(mainMod .. " + period",    hl.dsp.exec_cmd("${pkgs.rofimoji}/bin/rofimoji"))
+    hl.bind(mainMod .. " + CTRL + W",  hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh --pick"))
 
     -- screenshots (grim + slurp + swappy)
     hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh swappy"))
@@ -238,17 +261,17 @@ in
     hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
     hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-    -- media keys
-    hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-    hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
-    hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true })
-    hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true })
-    hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
-    hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
-    hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
-    hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-    hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-    hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+    -- media keys: swayosd gives an OSD overlay for volume/brightness/media.
+    hl.bind("XF86AudioRaiseVolume",   hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --output-volume raise"),        { locked = true, repeating = true })
+    hl.bind("XF86AudioLowerVolume",   hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --output-volume lower"),        { locked = true, repeating = true })
+    hl.bind("XF86AudioMute",          hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --output-volume mute-toggle"),   { locked = true })
+    hl.bind("XF86AudioMicMute",       hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --input-volume mute-toggle"),   { locked = true })
+    hl.bind("XF86MonBrightnessUp",    hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --brightness raise"),            { locked = true, repeating = true })
+    hl.bind("XF86MonBrightnessDown",  hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --brightness lower"),            { locked = true, repeating = true })
+    hl.bind("XF86AudioNext",          hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --playerctl next"),              { locked = true })
+    hl.bind("XF86AudioPause",         hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --playerctl play-pause"),        { locked = true })
+    hl.bind("XF86AudioPlay",          hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --playerctl play-pause"),        { locked = true })
+    hl.bind("XF86AudioPrev",          hl.dsp.exec_cmd("${pkgs.swayosd}/bin/swayosd-client --playerctl prev"),              { locked = true })
 
     --------------------------------
     ---- WINDOWS AND WORKSPACES ----
@@ -301,11 +324,21 @@ in
       exec >>"$LOG" 2>&1
       echo "[$(date +%Y-%m-%d\ %H:%M:%S)] autostart begin"
 
-      # Things that can start immediately.
-      nohup waybar                              >/dev/null 2>&1 &
+      # Wallpaper first: hyprpaper must be up before wallpaper.sh sets it.
       nohup hyprpaper                           >/dev/null 2>&1 &
+      sleep 0.5
+      ~/.config/hypr/scripts/wallpaper.sh --init >/dev/null 2>&1
+
+      # Kill any stray notification daemon before swaync grabs the name.
+      pkill -f 'mako|dunst' 2>/dev/null || true
+
+      # Then the rest of the desktop.
+      nohup waybar                              >/dev/null 2>&1 &
       nohup nm-applet --indicator               >/dev/null 2>&1 &
-      nohup GSK_RENDERER=cairo swaync           >/dev/null 2>&1 &
+      nohup GSK_RENDERER=cairo ${pkgs.swaynotificationcenter}/bin/swaync >/dev/null 2>&1 &
+      nohup ${pkgs.swayosd}/bin/swayosd-server  >/dev/null 2>&1 &
+      nohup wl-paste --type text  --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
+      nohup wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
       if command -v TgWsProxy >/dev/null 2>&1; then
           nohup TgWsProxy                       >/dev/null 2>&1 &

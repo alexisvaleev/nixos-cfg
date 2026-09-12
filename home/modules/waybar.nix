@@ -62,12 +62,9 @@ in
         disable-scroll = true;
         all-outputs = false;
         show-special = false;
-        persistent-only = true;
         sort-by = "number";
-        format = "{name}";
-        persistent-workspaces = {
-          "*" = [ 1 2 3 4 5 ];
-        };
+        format = "${nf "f111"}";
+        tooltip-format = "{name}";
       };
 
       "hyprland/language" = {
@@ -161,8 +158,10 @@ in
     }];
 
     style = ''
+      @import "/home/blessed/.config/theme/colors.css";
+
       * {
-          font-family: "Inter", "JetBrainsMono Nerd Font Propo", "JetBrainsMono Nerd Font", "Noto Sans";
+          font-family: "Inter", "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Noto Sans";
           font-size: 12px;
           border: none;
           border-radius: 0;
@@ -170,7 +169,7 @@ in
       }
 
       window#waybar {
-          background-color: rgba(20, 20, 27, 0.65);
+          background-color: alpha(@bg, 0.65);
           border-radius: 0;
       }
 
@@ -182,13 +181,13 @@ in
           padding: 0 10px;
           margin: 0;
           background-color: transparent;
-          color: ${theme.text};
+          color: @text;
           min-height: 28px;
       }
 
       #custom-logo, #pulseaudio, #network, #bluetooth, #battery,
       #custom-control, #custom-power, #hyprland-language {
-          font-family: "JetBrainsMono Nerd Font Propo", "Inter", "Noto Sans";
+          font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
       }
 
       #workspaces {
@@ -201,49 +200,49 @@ in
           margin: 0 2px;
           padding: 0 6px;
           border-radius: 4px;
-          color: ${theme.subtext};
+          color: @subtext;
           background-color: transparent;
           font-weight: 500;
       }
 
       #workspaces button:hover {
-          background-color: ${theme.surface2};
-          color: ${theme.text};
+          background-color: @surface2;
+          color: @text;
       }
 
       #workspaces button.active,
       #workspaces button.visible {
-          background-color: ${theme.purple};
-          color: ${theme.bg};
+          background-color: @purple;
+          color: @bg;
           font-weight: 600;
       }
 
       #workspaces button.urgent {
-          background-color: ${theme.red};
-          color: ${theme.bg};
+          background-color: @red;
+          color: @bg;
       }
 
       #workspaces button.empty,
       #workspaces button.persistent {
-          color: ${theme.subtext};
+          color: @subtext;
       }
 
       #language {
-          color: ${theme.mauve};
+          color: @mauve;
           font-weight: 600;
           font-size: 11px;
           min-width: 22px;
       }
 
       #custom-logo {
-          color: ${theme.purple};
+          color: @purple;
           font-size: 16px;
           padding-left: 18px;
           padding-right: 6px;
       }
 
       #custom-appname {
-          color: ${theme.text};
+          color: @text;
           font-weight: 500;
           padding-left: 0;
       }
@@ -254,21 +253,21 @@ in
           font-size: 13px;
       }
 
-      #pulseaudio { color: ${theme.mauve}; }
-      #network     { color: ${theme.blue}; }
-      #bluetooth   { color: ${theme.blue}; }
-      #battery     { color: ${theme.green}; }
-      #battery.warning { color: ${theme.yellow}; }
-      #battery.critical { color: ${theme.red}; }
-      #battery.charging { color: ${theme.green}; }
-      #custom-control { color: ${theme.subtext}; font-size: 13px; }
-      #custom-power { color: ${theme.red}; font-size: 13px; }
+      #pulseaudio { color: @mauve; }
+      #network     { color: @blue; }
+      #bluetooth   { color: @blue; }
+      #battery     { color: @green; }
+      #battery.warning { color: @yellow; }
+      #battery.critical { color: @red; }
+      #battery.charging { color: @green; }
+      #custom-control { color: @subtext; font-size: 13px; }
+      #custom-power { color: @red; font-size: 13px; }
 
       #tray { background-color: transparent; }
 
       #custom-power:hover {
-          background-color: ${theme.red};
-          color: ${theme.bg};
+          background-color: @red;
+          color: @bg;
           border-radius: 4px;
       }
 
@@ -282,7 +281,7 @@ in
       #tray:hover,
       #clock:hover,
       #hyprland-language:hover {
-          background-color: ${theme.surface2};
+          background-color: @surface2;
           border-radius: 4px;
       }
     '';

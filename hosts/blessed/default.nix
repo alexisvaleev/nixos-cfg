@@ -206,6 +206,7 @@ in
   fonts.packages = with pkgs; [
     inter
     nerd-fonts.jetbrains-mono
+    nerd-fonts.iosevka
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
   ];

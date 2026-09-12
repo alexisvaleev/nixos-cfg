@@ -17,6 +17,9 @@
     ./modules/wallpaper.nix
     ./modules/fastfetch.nix
     ./modules/apps.nix
+    ./modules/matugen.nix
+    ./modules/icons-cursor.nix
+    ./modules/osd.nix
   ];
 
   # small extra CLI utilities

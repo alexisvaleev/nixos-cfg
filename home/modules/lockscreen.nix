@@ -1,80 +1,99 @@
 # hyprlock (screen lock) + hypridle (idle daemon).
-# hyprlock config via the HM module (config-only, no systemd unit).
+# hyprlock reads colors from ~/.config/theme/colors.conf via `source`.
 # hypridle via raw config (started through hyprland.lua autostart).
 { config, pkgs, lib, ... }:
 let
-  theme = import ./theme.nix;
-  wall = "${config.home.homeDirectory}/.local/share/backgrounds/wallpaper.jpg";
+  home = config.home.homeDirectory;
+  wall = "${home}/.local/share/backgrounds/wallpaper.jpg";
 in
 {
-  programs.hyprlock = {
-    enable = true;
-    settings = with theme; {
-      general = {
-        hide_cursor = true;
-        ignore_empty_input = true;
-      };
+  xdg.configFile."hypr/hyprlock.conf".text = ''
+    source = ${home}/.config/theme/colors.conf
 
-      background = [
-        {
-          monitor = "";
-          path = wall;
-          blur_passes = 3;
-          blur_size = 8;
-          brightness = 0.5;
-        }
-      ];
+    general {
+        hide_cursor = true
+        ignore_empty_input = true
+    }
 
-      label = [
-        {
-          monitor = "";
-          text = "cmd[update:1000] echo \"$(date +'%H:%M')\"";
-          color = text;
-          font_size = 96;
-          font_family = "JetBrainsMono Nerd Font";
-          position = "0, 120";
-          halign = "center";
-          valign = "center";
-        }
-        {
-          monitor = "";
-          text = "cmd[update:1000] echo \"$(date +'%A, %d %B')\"";
-          color = subtext;
-          font_size = 22;
-          font_family = "JetBrainsMono Nerd Font";
-          position = "0, 40";
-          halign = "center";
-          valign = "center";
-        }
-      ];
+    background {
+        monitor =
+        path = ${wall}
+        blur_passes = 3
+        blur_size = 8
+        brightness = 0.5
+        color = $bg
+    }
 
-      input-field = [
-        {
-          monitor = "";
-          size = "300, 50";
-          outline_thickness = 2;
-          dots_center = true;
-          fade_on_empty = false;
-          placeholder_text = "Enter password...";
-          hide_input = false;
-          position = "0, -80";
-          halign = "center";
-          valign = "center";
-          font_family = "JetBrainsMono Nerd Font";
-          font_color = text;
-          inner_color = surface;
-          outer_color = purple;
-          check_color = blue;
-          fail_color = red;
-          capslock_color = yellow;
-        }
-      ];
-    };
-  };
+    # Big clock
+    label {
+        monitor =
+        text = cmd[update:1000] echo "$(date +'%H:%M')"
+        color = $text
+        font_size = 96
+        font_family = Iosevka Nerd Font
+        position = 0, 140
+        halign = center
+        valign = center
+    }
 
-  xdg.configFile."hypr/hypridle.conf" = {
-    force = true;
-    text = ''
+    # Date below the clock
+    label {
+        monitor =
+        text = cmd[update:1000] echo "$(date +'%A, %d %B')"
+        color = $subtext
+        font_size = 22
+        font_family = Iosevka Nerd Font
+        position = 0, 60
+        halign = center
+        valign = center
+    }
+
+    # Battery level (right of input field)
+    label {
+        monitor =
+        text = cmd[update:5000] echo "$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)%"
+        color = $subtext
+        font_size = 14
+        font_family = Iosevka Nerd Font
+        position = 0, -160
+        halign = center
+        valign = center
+    }
+
+    # Weather (wttr.in) — short format, 2s timeout so it doesn't block.
+    label {
+        monitor =
+        text = cmd[update:600000] curl -m 2 -s "wttr.in/?format=%t+%C" 2>/dev/null || echo ""
+        color = $subtext
+        font_size = 14
+        font_family = Iosevka Nerd Font
+        position = 0, -200
+        halign = center
+        valign = center
+    }
+
+    input-field {
+        monitor =
+        size = 300, 50
+        outline_thickness = 2
+        dots_center = true
+        fade_on_empty = false
+        placeholder_text = Enter password...
+        hide_input = false
+        position = 0, -60
+        halign = center
+        valign = center
+        font_family = Iosevka Nerd Font
+        font_color = $text
+        inner_color = $surface
+        outer_color = $purple
+        check_color = $blue
+        fail_color = $red
+        capslock_color = $yellow
+    }
+  '';
+
+  xdg.configFile."hypr/hypridle.conf".text = ''
     general {
         # Run through loginctl so hypridle can wait until the session is
         # actually locked before allowing the system to sleep.
@@ -102,5 +121,4 @@ in
         on-resume = hyprctl dispatch 'hl.dsp.dpms({action="on"})'
     }
   '';
-  };
 }
