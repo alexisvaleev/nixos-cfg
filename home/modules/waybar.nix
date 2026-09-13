@@ -263,6 +263,13 @@ in
       #custom-control { color: @subtext; font-size: 13px; }
       #custom-power { color: @red; font-size: 13px; }
 
+      /* Nerd Font glyphs sit a bit high in the line box — nudge them down
+         so the icon looks centered in the 28px module. */
+      #custom-logo, #network, #bluetooth, #custom-control,
+      #custom-power, #custom-appname, #pulseaudio, #battery {
+          padding-top: 2px;
+      }
+
       #tray { background-color: transparent; }
 
       #custom-power:hover {
