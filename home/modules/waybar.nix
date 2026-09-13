@@ -63,7 +63,7 @@ in
         all-outputs = false;
         show-special = false;
         sort-by = "number";
-        format = "${nf "f111"}";
+        format = "{id}";
         tooltip-format = "{name}";
       };
 
