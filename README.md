@@ -15,13 +15,17 @@ NixOS Flake with Home Manager for a declarative Hyprland desktop.
 
 ```
 .
-├── flake.nix                 # entry point
+├── flake.nix                 # entry point — one target per machine
 ├── flake.lock                # pinned inputs
 ├── hosts/
-│   └── blessed/
-│       ├── default.nix       # system config (hostname, user, services, packages)
-│       ├── hardware.nix      # disk UUIDs / initrd modules — machine specific
-│       └── sddm-theme.conf   # SDDM theme overrides
+│   ├── common.nix            # shared, hardware-agnostic system config
+│   ├── sddm-theme.conf       # SDDM theme overrides
+│   ├── blessed/
+│   │   ├── default.nix       # hostname + hardware.nix import
+│   │   └── hardware.nix      # disk UUIDs / initrd — laptop specific
+│   └── desktop/
+│       ├── default.nix       # hostname + hardware.nix import
+│       └── hardware.nix      # stub — replace with nixos-generate-config output
 └── home/
     ├── default.nix           # home-manager entry point
     └── modules/              # waybar, swaync, hyprland, lockscreen, shell, apps, ...
@@ -36,19 +40,25 @@ NixOS Flake with Home Manager for a declarative Hyprland desktop.
    cd ~/.dotfiles
    ```
 
-2. On a **new machine** regenerate `hosts/blessed/hardware.nix` to match your disks:
+2. On a **new machine** pick a host name, e.g. `desktop`, and generate its
+   `hardware.nix` (disk UUIDs, initrd modules, CPU microcode):
 
    ```bash
-   sudo nixos-generate-config --root /mnt --show-hardware-config > hosts/blessed/hardware.nix
+   sudo nixos-generate-config --root /mnt --show-hardware-config > hosts/desktop/hardware.nix
    ```
 
-   If the host name changes, also adjust the flake output name in `flake.nix`.
+   `hosts/desktop/default.nix` already imports `../common.nix` and sets
+   `networking.hostName = "desktop"`. For NVIDIA add the lines commented
+   out in that file.
+
+   For another machine name, copy `hosts/desktop` to `hosts/<name>` and add
+   `nixosConfigurations.<name> = mkHost "<name>";` in `flake.nix`.
 
 3. Build and activate:
 
    ```bash
    nix flake check
-   sudo nixos-rebuild switch --flake .#blessed
+   sudo nixos-rebuild switch --flake .#desktop
    ```
 
    After the first switch, log out and back in (or run `hyprctl reload`) so the new Hyprland session starts.
@@ -65,8 +75,8 @@ NixOS Flake with Home Manager for a declarative Hyprland desktop.
 
 ## Security / portability notes
 
-- `hosts/blessed/default.nix` contains a **password hash** (`hashedPassword`) and **SDDM auto-login** settings. Review before making the repo public; use `sops-nix` or `agenix` if you want to keep it private.
-- `hosts/blessed/hardware.nix` has **disk UUIDs** — it must be regenerated for other hardware.
+- `hosts/common.nix` contains a **password hash** (`hashedPassword`) and **SDDM auto-login** settings. Review before making the repo public; use `sops-nix` or `agenix` if you want to keep it private.
+- `hosts/<name>/hardware.nix` has **disk UUIDs** — it must be generated per machine.
 - The wallpaper lives in `assets/wallpaper.jpg` and is installed to `~/.local/share/backgrounds/`.
 - `home/modules/notifications.nix` is an old Mako config and is **not imported**; SwayNC handles notifications.
 
@@ -75,10 +85,13 @@ NixOS Flake with Home Manager for a declarative Hyprland desktop.
 - `Super + Q` — terminal (Kitty)
 - `Super + R` — rofi launcher
 - `Super + L` — lock screen (hyprlock)
-- `Super + Shift + C` — SwayNC control center
+- `Super + N` / `Super + Shift + C` — SwayNC notification overlay / control center
+- `Super + Shift + V` — clipboard history (cliphist)
+- `Super + .` — emoji picker (rofimoji)
+- `Super + Ctrl + W` — wallpaper picker (rofi)
 - `Super + Shift + S` — screenshot area (swappy)
 - `Super + 1..0` / `Ctrl + Alt + arrows` — workspaces
-- `XF86Audio*` / `XF86MonBrightness*` — volume and brightness
+- `XF86Audio*` / `XF86MonBrightness*` — volume and brightness (SwayOSD)
 
 ## License
 

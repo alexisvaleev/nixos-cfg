@@ -12,12 +12,11 @@
   outputs = { self, nixpkgs, home-manager, ... }@inputs:
     let
       system = "x86_64-linux";
-    in {
-      nixosConfigurations.blessed = nixpkgs.lib.nixosSystem {
+      mkHost = name: nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./hosts/blessed/default.nix
+          ./hosts/${name}/default.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -28,6 +27,11 @@
             home-manager.extraSpecialArgs = { inherit inputs; };
           }
         ];
+      };
+    in {
+      nixosConfigurations = {
+        blessed = mkHost "blessed";
+        desktop = mkHost "desktop";
       };
     };
 }
