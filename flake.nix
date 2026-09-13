@@ -32,6 +32,7 @@
       nixosConfigurations = {
         blessed = mkHost "blessed";
         desktop = mkHost "desktop";
+        portable = mkHost "portable";
       };
     };
 }

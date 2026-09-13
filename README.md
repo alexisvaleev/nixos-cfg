@@ -23,9 +23,12 @@ NixOS Flake with Home Manager for a declarative Hyprland desktop.
 │   ├── blessed/
 │   │   ├── default.nix       # hostname + hardware.nix import
 │   │   └── hardware.nix      # disk UUIDs / initrd — laptop specific
-│   └── desktop/
+│   ├── desktop/
+│   │   ├── default.nix       # hostname + hardware.nix import
+│   │   └── hardware.nix      # stub — replace with nixos-generate-config output
+│   └── portable/
 │       ├── default.nix       # hostname + hardware.nix import
-│       └── hardware.nix      # stub — replace with nixos-generate-config output
+│       └── hardware.nix      # generic (not-detected.nix) + this SSD's fileSystems
 └── home/
     ├── default.nix           # home-manager entry point
     └── modules/              # waybar, swaync, hyprland, lockscreen, shell, apps, ...
@@ -54,11 +57,20 @@ NixOS Flake with Home Manager for a declarative Hyprland desktop.
    For another machine name, copy `hosts/desktop` to `hosts/<name>` and add
    `nixosConfigurations.<name> = mkHost "<name>";` in `flake.nix`.
 
+   **Portable SSD** (same drive on several machines): use `hosts/portable`.
+   It imports `not-detected.nix` (broad initrd modules) so the same build
+   boots on almost any hardware. Fill in `hosts/portable/hardware.nix`
+   `fileSystems`/`swapDevices` once — the SSD's UUIDs don't change.
+
+   ```bash
+   sudo nixos-rebuild switch --flake .#portable
+   ```
+
 3. Build and activate:
 
    ```bash
    nix flake check
-   sudo nixos-rebuild switch --flake .#desktop
+   sudo nixos-rebuild switch --flake .#blessed    # or .#desktop / .#portable
    ```
 
    After the first switch, log out and back in (or run `hyprctl reload`) so the new Hyprland session starts.
