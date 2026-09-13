@@ -197,8 +197,8 @@ in
       #workspaces button {
           min-width: 22px;
           min-height: 22px;
-          margin: 0 2px;
-          padding: 0 6px;
+          margin: 3px 2px;
+          padding: 0;
           border-radius: 4px;
           color: @subtext;
           background-color: transparent;
