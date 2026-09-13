@@ -232,6 +232,7 @@ in
     hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("~/.config/hypr/scripts/clipboard.sh"))
     hl.bind(mainMod .. " + period",    hl.dsp.exec_cmd("${pkgs.rofimoji}/bin/rofimoji"))
     hl.bind(mainMod .. " + CTRL + W",  hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh --pick"))
+    hl.bind(mainMod .. " + CTRL + T",  hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar-tune"))
 
     -- screenshots (grim + slurp + swappy)
     hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh swappy"))

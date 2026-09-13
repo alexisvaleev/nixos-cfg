@@ -159,6 +159,7 @@ in
 
     style = ''
       @import "/home/blessed/.config/theme/colors.css";
+      @import "/home/blessed/.config/waybar/adjust.css";
 
       * {
           font-family: "Inter", "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Noto Sans";
@@ -263,13 +264,6 @@ in
       #custom-control { color: @subtext; font-size: 13px; }
       #custom-power { color: @red; font-size: 13px; }
 
-      /* Nerd Font glyphs sit a bit high in the line box — nudge them down
-         so the icon looks centered in the 28px module. */
-      #custom-logo, #network, #bluetooth, #custom-control,
-      #custom-power, #custom-appname, #pulseaudio, #battery {
-          padding-top: 2px;
-      }
-
       #tray { background-color: transparent; }
 
       #custom-power:hover {
@@ -316,4 +310,140 @@ in
       esac
     '';
   };
+
+  # ─── Live spacing tuner ─────────────────────────────────────────────
+  # Writes ~/.config/waybar/adjust.css (imported by style.css above; its
+  # window#waybar-prefixed selectors are more specific and therefore win)
+  # then reloads waybar's CSS via SIGUSR2 so every tweak is seen instantly.
+  xdg.configFile."hypr/scripts/waybar-tune" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      DIR="$HOME/.config/waybar"
+      FILE="$DIR/adjust.css"
+      ENV="$DIR/tune.env"
+
+      # defaults mirror style.css
+      ICON_PAD=0; WS_MARGIN=3; WS_WIDTH=22; WS_HP=0; LOGO_LEFT=18; APP_LEFT=0; MOD_PAD=10
+      [ -f "$ENV" ] && . "$ENV" || true
+
+      render() {
+          # GTK adds padding on top of min-height, so we shrink min-height
+          # to keep every module exactly 28px while nudging its content.
+          local mh=$(( 28 - ICON_PAD )); [ "$mh" -lt 0 ] && mh=0
+          local wmh=$(( 28 - 2 * WS_MARGIN )); [ "$wmh" -lt 0 ] && wmh=0
+          cat > "$FILE" <<CSS
+      /* waybar-tune overrides — regenerated, do not edit by hand. */
+      window#waybar #custom-logo, window#waybar #custom-appname,
+      window#waybar #hyprland-workspaces, window#waybar #hyprland-language,
+      window#waybar #pulseaudio, window#waybar #network, window#waybar #bluetooth,
+      window#waybar #battery, window#waybar #tray, window#waybar #clock,
+      window#waybar #custom-control, window#waybar #custom-power {
+          padding-left: ''${MOD_PAD}px;
+          padding-right: ''${MOD_PAD}px;
+      }
+      window#waybar #custom-logo    { padding-left: ''${LOGO_LEFT}px; }
+      window#waybar #custom-appname { padding-left: ''${APP_LEFT}px; }
+
+      window#waybar #custom-logo, window#waybar #network, window#waybar #bluetooth,
+      window#waybar #custom-control, window#waybar #custom-power,
+      window#waybar #custom-appname, window#waybar #pulseaudio,
+      window#waybar #battery, window#waybar #hyprland-language, window#waybar #clock {
+          min-height: ''${mh}px;
+          padding-top: ''${ICON_PAD}px;
+      }
+      window#waybar #workspaces button {
+          min-height: ''${wmh}px;
+          margin: ''${WS_MARGIN}px 2px;
+          min-width: ''${WS_WIDTH}px;
+          padding: 0 ''${WS_HP}px;
+      }
+      CSS
+          printf 'ICON_PAD=%s\nWS_MARGIN=%s\nWS_WIDTH=%s\nWS_HP=%s\nLOGO_LEFT=%s\nAPP_LEFT=%s\nMOD_PAD=%s\n' \
+              "$ICON_PAD" "$WS_MARGIN" "$WS_WIDTH" "$WS_HP" "$LOGO_LEFT" "$APP_LEFT" "$MOD_PAD" > "$ENV"
+          pkill -SIGUSR2 -x waybar 2>/dev/null || true
+      }
+
+      reset_all() {
+          : > "$FILE"
+          rm -f "$ENV"
+          pkill -SIGUSR2 -x waybar 2>/dev/null || true
+      }
+
+      step() {
+          local key=$1 d n
+          while true; do
+              d=$(printf '%s\n' "-4" "-2" "-1" "+1" "+2" "+4" "set…" "done" \
+                  | rofi -dmenu -i -p "$key = ''${!key}") || break
+              [ -z "$d" ] && break
+              case "$d" in
+                  done) break ;;
+                  set…) n=$(echo | rofi -dmenu -p "value for $key" || true)
+                        [[ "''${n:-}" =~ ^-?[0-9]+$ ]] && printf -v "$key" '%s' "$n" ;;
+                  *)    [[ "$d" =~ ^[+-]?[0-9]+$ ]] \
+                          && printf -v "$key" '%d' "$(( ''${!key} + d ))" ;;
+              esac
+              render
+          done
+      }
+
+      menu() {
+          local sel key
+          while true; do
+              sel=$(printf '%s\n' \
+                  "ICON_PAD   icons/text up-down  = $ICON_PAD" \
+                  "WS_MARGIN  ws buttons up-down = $WS_MARGIN" \
+                  "WS_WIDTH   ws button width    = $WS_WIDTH" \
+                  "WS_HP      ws button horiz    = $WS_HP" \
+                  "LOGO_LEFT  logo left pad      = $LOGO_LEFT" \
+                  "APP_LEFT   appname left pad   = $APP_LEFT" \
+                  "MOD_PAD    module horiz pad   = $MOD_PAD" \
+                  "reset" \
+                  "quit" \
+                  | rofi -dmenu -i -p "waybar-tune") || break
+              [ -z "$sel" ] && break
+              key=''${sel%% *}
+              case "$key" in
+                  reset) reset_all ;;
+                  quit)  break ;;
+                  ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|LOGO_LEFT|APP_LEFT|MOD_PAD) step "$key" ;;
+                  *) break ;;
+              esac
+          done
+      }
+
+      case "''${1:-menu}" in
+          menu)  menu ;;
+          show)  cat "$FILE" 2>/dev/null || true ;;
+          reset) reset_all ;;
+          set)   key=''${2:?usage: waybar-tune set KEY VALUE}
+                 val=''${3:?usage: waybar-tune set KEY VALUE}
+                 case "$key" in
+                     ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|LOGO_LEFT|APP_LEFT|MOD_PAD)
+                         [[ "$val" =~ ^-?[0-9]+$ ]] || { echo "waybar-tune: value must be an integer" >&2; exit 1; }
+                         printf -v "$key" '%s' "$val"; render ;;
+                     *) echo "waybar-tune: unknown key '$key'" >&2; exit 1 ;;
+                 esac ;;
+          bump)  key=''${2:?usage: waybar-tune bump KEY N}
+                 d=''${3:?usage: waybar-tune bump KEY N}
+                 case "$key" in
+                     ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|LOGO_LEFT|APP_LEFT|MOD_PAD)
+                         printf -v "$key" '%d' "$(( ''${!key} + d ))"; render ;;
+                     *) echo "waybar-tune: unknown key '$key'" >&2; exit 1 ;;
+                 esac ;;
+          *)     echo "usage: waybar-tune [menu|show|reset|set KEY VAL|bump KEY ±N]" >&2; exit 1 ;;
+      esac
+    '';
+  };
+
+  # adjust.css must exist so the @import above never fails; it is a real
+  # writable file (not a store symlink) so waybar-tune can rewrite it.
+  home.activation.waybarAdjustCss = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    if [ ! -f "$HOME/.config/waybar/adjust.css" ]; then
+      run printf '/* waybar-tune overrides — managed by ~/.config/hypr/scripts/waybar-tune */\n' \
+        > "$HOME/.config/waybar/adjust.css" || true
+    fi
+  '';
 }
