@@ -13,11 +13,14 @@ in
     ------------------
     ---- MONITORS ----
     ------------------
-    -- Auto-detect monitors (universial config)
-    -- Uncomment and customize per machine if needed:
-    -- hl.monitor({ output = "DP-1", mode = "1920x1080@120Hz", position = "0x0", scale = 1.0 })
-    -- hl.monitor({ output = "HDMI-A-2", mode = "1920x1080@120Hz", position = "1920x0", scale = 1.0 })
-    -- hl.monitor({ output = "DP-3", mode = "2560x1440@165Hz", position = "0x0", scale = 1.0 })
+    -- Main: HKM N2788HZ 27" 1440p @ 165Hz, VRR (VRR needs the proprietary
+    -- NVIDIA driver; nouveau ignores the flag but it is harmless to keep).
+    hl.monitor({ output = "DP-3", mode = "2560x1440@165Hz", position = "0x0", scale = 1.0, vrr = 1 })
+    -- Samsung 4K TV stays connected but unused — disabled by description so
+    -- the rule only ever matches this TV, whatever port/machine it's on.
+    hl.monitor({ output = "desc:Samsung Electric Company SAMSUNG 0x01000E00", disabled = true })
+    -- Fallback for any other monitor (portable SSD on other machines).
+    hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.0 })
 
     ---------------------
     ---- MY PROGRAMS ----
