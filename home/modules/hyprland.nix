@@ -366,7 +366,8 @@ in
       pkill -f 'mako|dunst' 2>/dev/null || true
 
       # Then the rest of the desktop.
-      nohup waybar                              >/dev/null 2>&1 &
+      pgrep -x waybar >/dev/null 2>&1 || \
+          nohup waybar                          >/dev/null 2>&1 &
       nohup ~/.config/hypr/scripts/sni-fixer.sh >/dev/null 2>&1 &
       nohup nm-applet --indicator               >/dev/null 2>&1 &
       nohup GSK_RENDERER=cairo ${pkgs.swaynotificationcenter}/bin/swaync >/dev/null 2>&1 &
