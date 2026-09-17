@@ -47,7 +47,7 @@ in
 
       modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
       modules-center = [ "clock" ];
-      modules-right = [ "custom/weather" "group/player" "cpu" "memory" "temperature" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "tray" "custom/control" "custom/power" ];
+      modules-right = [ "custom/weather" "mpris" "cpu" "memory" "temperature" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "tray" "custom/control" "custom/power" ];
 
       "custom/logo" = {
         format = "${ic.logo}";
@@ -121,53 +121,18 @@ in
         tooltip = false;
       };
 
-      # Player group: track title is always visible; hovering slides out
-      # ⏮ ⏯ ⏹ ⏭ controls. Scrolling the title seeks ±10s like a slider.
-      "group/player" = {
-        orientation = "inherit";
-        drawer = {
-          "transition-duration" = 300;
-          "children-class" = "player-controls";
-          "transition-left-to-right" = false;
-          "click-to-reveal" = false;
-        };
-        modules = [ "mpris" "custom/player-prev" "custom/player-play" "custom/player-stop" "custom/player-next" ];
-      };
-
+      # Player: artist in the bar; click drops a control panel under the
+      # bar (player-menu.sh), middle-click raises the player's window,
+      # scroll seeks ±10s.
       "mpris" = {
         format = "${ic.music} {artist}";
         format-paused = "${ic.music} {artist}";
         max-length = 25;
-        on-click = "~/.config/hypr/scripts/player-raise.sh";
-        on-click-middle = "${pkgs.playerctl}/bin/playerctl stop";
+        on-click = "~/.config/hypr/scripts/player-menu.sh";
+        on-click-middle = "~/.config/hypr/scripts/player-raise.sh";
         on-scroll-up = "${pkgs.playerctl}/bin/playerctl position 10+";
         on-scroll-down = "${pkgs.playerctl}/bin/playerctl position 10-";
         tooltip-format = "{player}: {artist} - {title} ({position} / {length})";
-      };
-
-      "custom/player-prev" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh prev";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl previous";
-        tooltip = false;
-      };
-      "custom/player-play" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh play";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
-        tooltip = false;
-      };
-      "custom/player-stop" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh stop";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl stop";
-        tooltip = false;
-      };
-      "custom/player-next" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh next";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl next";
-        tooltip = false;
       };
 
       "cpu" = {
@@ -355,18 +320,7 @@ in
       #custom-caffeine  { color: @subtext; }
       #custom-caffeine.on { color: @green; }
 
-      /* Player drawer buttons — compact, purple accent. */
-      #custom-player-prev, #custom-player-play,
-      #custom-player-stop, #custom-player-next {
-          padding: 0 5px;
-          min-height: 28px;
-          color: @purple;
-          font-size: 13px;
-      }
-      .player-controls {
-          background-color: alpha(@surface2, 0.5);
-          border-radius: 6px;
-      }
+
       #battery.warning { color: @yellow; }
       #battery.critical { color: @red; }
       #battery.charging { color: @green; }

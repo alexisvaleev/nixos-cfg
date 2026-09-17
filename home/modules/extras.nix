@@ -130,19 +130,21 @@
     '';
   };
 
-  # ─── Player control buttons (waybar mpris drawer) ───────────────────
-  # Prints the glyph for each button; "play" reflects playerctl status.
-  xdg.configFile."hypr/scripts/player-buttons.sh" = {
+  # ─── Player dropdown menu (waybar mpris click) ──────────────────────
+  # Clicking the artist in the bar drops a small rofi panel just under
+  # the bar with prev/play/stop/next controls.
+  xdg.configFile."hypr/scripts/player-menu.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      s=$(${pkgs.playerctl}/bin/playerctl status 2>/dev/null)
-      [ -z "$s" ] && exit 0   # no player -> empty module
-      case "$1" in
-          play) [ "$s" = "Playing" ] && printf '⏸' || printf '▶' ;;
-          prev) printf '⏮' ;;
-          next) printf '⏭' ;;
-          stop) printf '⏹' ;;
+      choice=$(printf '⏮  prev\n⏯  play / pause\n⏹  stop\n⏭  next\n' \
+          | rofi -dmenu -i -p "player" \
+              -theme-str 'window {location: north; anchor: north; width: 320px; y-offset: 34px; border-radius: 10px;} listview {lines: 4; fixed-height: true;}')
+      case "$choice" in
+          *prev*)  ${pkgs.playerctl}/bin/playerctl previous ;;
+          *play*)  ${pkgs.playerctl}/bin/playerctl play-pause ;;
+          *stop*)  ${pkgs.playerctl}/bin/playerctl stop ;;
+          *next*)  ${pkgs.playerctl}/bin/playerctl next ;;
       esac
     '';
   };
