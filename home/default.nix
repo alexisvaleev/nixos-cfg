@@ -20,6 +20,7 @@
     ./modules/matugen.nix
     ./modules/icons-cursor.nix
     ./modules/osd.nix
+    ./modules/extras.nix
   ];
 
   # small extra CLI utilities

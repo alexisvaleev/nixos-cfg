@@ -25,6 +25,11 @@ let
     clock      = nf "f017";  # nf-fa-clock
     power      = nf "f011";  # nf-fa-power_off
     control    = nf "f013";  # nf-fa-gear
+    # extras
+    music      = nf "f001";  # nf-fa-music
+    cpu        = nf "f2db";  # nf-fa-microchip
+    mem        = nf "f538";  # nf-fa-memory
+    temp       = nf "f2c9";  # nf-fa-thermometer_half
   };
 in
 {
@@ -42,7 +47,7 @@ in
 
       modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
       modules-center = [ "clock" ];
-      modules-right = [ "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "tray" "custom/control" "custom/power" ];
+      modules-right = [ "custom/weather" "mpris" "cpu" "memory" "temperature" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "tray" "custom/control" "custom/power" ];
 
       "custom/logo" = {
         format = "${ic.logo}";
@@ -116,6 +121,49 @@ in
         tooltip = false;
       };
 
+      "mpris" = {
+        format = "${ic.music} {artist} - {title}";
+        format-paused = "${ic.music} {artist} - {title}";
+        max-length = 35;
+        on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
+        on-scroll-up = "${pkgs.playerctl}/bin/playerctl next";
+        on-scroll-down = "${pkgs.playerctl}/bin/playerctl previous";
+        tooltip = false;
+      };
+
+      "cpu" = {
+        format = "${ic.cpu} {usage}%";
+        on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
+        tooltip = false;
+      };
+
+      "memory" = {
+        format = "${ic.mem} {percentage}%";
+        on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
+        tooltip = false;
+      };
+
+      "temperature" = {
+        format = "${ic.temp} {temperatureC}°";
+        on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
+        tooltip = false;
+      };
+
+      "custom/weather" = {
+        exec = "~/.config/hypr/scripts/weather.sh";
+        "return-type" = "json";
+        interval = 1800;
+        max-length = 30;
+      };
+
+      "custom/caffeine" = {
+        exec = "~/.config/hypr/scripts/caffeine.sh";
+        "return-type" = "json";
+        interval = 5;
+        on-click = "~/.config/hypr/scripts/caffeine.sh toggle";
+        tooltip = true;
+      };
+
       "tray" = {
         spacing = 8;
         icon-size = 16;
@@ -178,7 +226,8 @@ in
 
       #custom-logo, #custom-appname, #hyprland-workspaces, #hyprland-language,
       #pulseaudio, #network, #bluetooth, #battery, #tray, #clock,
-      #custom-control, #custom-power {
+      #custom-control, #custom-power,
+      #mpris, #cpu, #memory, #temperature, #custom-weather, #custom-caffeine {
           padding: 0 10px;
           margin: 0;
           background-color: transparent;
@@ -187,7 +236,8 @@ in
       }
 
       #custom-logo, #pulseaudio, #network, #bluetooth, #battery,
-      #custom-control, #custom-power, #hyprland-language {
+      #custom-control, #custom-power, #hyprland-language,
+      #mpris, #cpu, #memory, #temperature, #custom-weather, #custom-caffeine {
           font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
       }
 
@@ -258,6 +308,13 @@ in
       #network     { color: @blue; }
       #bluetooth   { color: @blue; }
       #battery     { color: @green; }
+      #mpris        { color: @purple; }
+      #cpu          { color: @blue; }
+      #memory       { color: @mauve; }
+      #temperature  { color: @yellow; }
+      #custom-weather   { color: @blue; }
+      #custom-caffeine  { color: @subtext; }
+      #custom-caffeine.on { color: @green; }
       #battery.warning { color: @yellow; }
       #battery.critical { color: @red; }
       #battery.charging { color: @green; }
@@ -281,7 +338,13 @@ in
       #custom-control:hover,
       #tray:hover,
       #clock:hover,
-      #hyprland-language:hover {
+      #hyprland-language:hover,
+      #mpris:hover,
+      #cpu:hover,
+      #memory:hover,
+      #temperature:hover,
+      #custom-weather:hover,
+      #custom-caffeine:hover {
           background-color: @surface2;
           border-radius: 4px;
       }
@@ -340,7 +403,10 @@ in
       window#waybar #hyprland-workspaces, window#waybar #hyprland-language,
       window#waybar #pulseaudio, window#waybar #network, window#waybar #bluetooth,
       window#waybar #battery, window#waybar #tray, window#waybar #clock,
-      window#waybar #custom-control, window#waybar #custom-power {
+      window#waybar #custom-control, window#waybar #custom-power,
+      window#waybar #mpris, window#waybar #cpu, window#waybar #memory,
+      window#waybar #temperature, window#waybar #custom-weather,
+      window#waybar #custom-caffeine {
           padding-left: ''${MOD_PAD}px;
           padding-right: ''${MOD_PAD}px;
       }
@@ -350,7 +416,10 @@ in
       window#waybar #custom-logo, window#waybar #network, window#waybar #bluetooth,
       window#waybar #custom-control, window#waybar #custom-power,
       window#waybar #custom-appname, window#waybar #pulseaudio,
-      window#waybar #battery, window#waybar #hyprland-language, window#waybar #clock {
+      window#waybar #battery, window#waybar #hyprland-language, window#waybar #clock,
+      window#waybar #mpris, window#waybar #cpu, window#waybar #memory,
+      window#waybar #temperature, window#waybar #custom-weather,
+      window#waybar #custom-caffeine {
           min-height: ''${mh}px;
           padding-top: ''${ICON_PAD}px;
       }

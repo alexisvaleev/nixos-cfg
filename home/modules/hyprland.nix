@@ -247,6 +247,12 @@ in
     hl.bind(mainMod .. " + CTRL + W",  hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh --pick"))
     hl.bind(mainMod .. " + CTRL + T",  hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar-tune"))
 
+    -- extras: keybind cheatsheet, night light, screen record, mixer
+    hl.bind(mainMod .. " + slash",        hl.dsp.exec_cmd("~/.config/hypr/scripts/cheatsheet.sh"))
+    hl.bind(mainMod .. " + SHIFT + N",    hl.dsp.exec_cmd("~/.config/hypr/scripts/nightlight.sh"))
+    hl.bind(mainMod .. " + SHIFT + Print", hl.dsp.exec_cmd("~/.config/hypr/scripts/record.sh"))
+    hl.bind(mainMod .. " + ALT + V",      hl.dsp.exec_cmd("${pkgs.pwvucontrol}/bin/pwvucontrol"))
+
     -- screenshots (grim + slurp + swappy)
     hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh swappy"))
     hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh full-clip"))
@@ -309,6 +315,18 @@ in
         float = true,
     })
 
+    -- Floating utility windows opened from keybinds/waybar.
+    hl.window_rule({
+        name  = "mixer-float",
+        match = { class = "pwvucontrol" },
+        float = true, size = "60% 70%", center = true,
+    })
+    hl.window_rule({
+        name  = "btop-float",
+        match = { class = "btop-float" },
+        float = true, size = "70% 80%", center = true,
+    })
+
     hl.window_rule({
         name  = "telegram-opacity",
         match = { class = "org.telegram.desktop" },
@@ -359,6 +377,9 @@ in
       if command -v TgWsProxy >/dev/null 2>&1; then
           nohup TgWsProxy                       >/dev/null 2>&1 &
       fi
+
+      # Night light switches itself on in the evening (20:00–07:00).
+      ~/.config/hypr/scripts/nightlight.sh auto &
 
       # hypridle needs the logind session to be registered, which happens
       # slightly after Hyprland is fully up.  Wait a bit, start it, then
