@@ -13,13 +13,21 @@ in
     ------------------
     ---- MONITORS ----
     ------------------
-    -- Main: HKM N2788HZ 27" 1440p @ 165Hz, VRR (VRR needs the proprietary
-    -- NVIDIA driver; nouveau ignores the flag but it is harmless to keep).
-    hl.monitor({ output = "DP-3", mode = "2560x1440@165Hz", position = "0x0", scale = 1.0, vrr = 1 })
-    -- Samsung 4K TV stays connected but unused — disabled by description so
-    -- the rule only ever matches this TV, whatever port/machine it's on.
+    -- Rules are matched by EDID description so they stick to the physical
+    -- display, not the port — this SSD boots on several machines.
+
+    -- Desktop PC: HKM N2788HZ 27" 1440p @ 165Hz, VRR (VRR needs the
+    -- proprietary NVIDIA driver; nouveau ignores the flag — harmless).
+    hl.monitor({ output = "desc:HKM N2788HZ 0000000000001", mode = "2560x1440@165Hz", position = "0x0", scale = 1.0, vrr = 1 })
+    -- ... and its Samsung 4K TV stays connected but unused.
     hl.monitor({ output = "desc:Samsung Electric Company SAMSUNG 0x01000E00", disabled = true })
-    -- Fallback for any other monitor (portable SSD on other machines).
+
+    -- Second PC: two LG UltraGear, both at 1080p — the HDMI port can't do
+    -- 4K@60, so 1080p@240/120 is the usable mode. 240Hz panel on the left.
+    hl.monitor({ output = "desc:LG Electronics LG ULTRAGEAR 0x00056F29", mode = "1920x1080@240Hz", position = "0x0", scale = 1.0, vrr = 1 })
+    hl.monitor({ output = "desc:LG Electronics LG ULTRAGEAR 0x00056F2B", mode = "1920x1080@120Hz", position = "1920x0", scale = 1.0, vrr = 1 })
+
+    -- Fallback for anything else.
     hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.0 })
 
     ---------------------
