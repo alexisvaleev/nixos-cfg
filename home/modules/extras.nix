@@ -152,9 +152,10 @@
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      out=$(curl -s --max-time 5 'wttr.in/?format=%t+%C&lang=ru' 2>/dev/null)
+      # %t = "+14°C", %c = weather emoji, %C = text condition (tooltip).
+      out=$(curl -s --max-time 5 'wttr.in/?format=%t+%c|%C&lang=ru' 2>/dev/null)
       if [ -n "$out" ]; then
-          printf '{"text":"%s","tooltip":"%s"}\n' "$out" "$out"
+          printf '{"text":"%s","tooltip":"%s"}\n' "''${out%%|*}" "''${out##*|}"
       else
           echo '{"text":""}'
       fi
