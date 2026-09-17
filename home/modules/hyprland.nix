@@ -347,6 +347,7 @@ in
 
       # Then the rest of the desktop.
       nohup waybar                              >/dev/null 2>&1 &
+      nohup ~/.config/hypr/scripts/sni-fixer.sh >/dev/null 2>&1 &
       nohup nm-applet --indicator               >/dev/null 2>&1 &
       nohup GSK_RENDERER=cairo ${pkgs.swaynotificationcenter}/bin/swaync >/dev/null 2>&1 &
       nohup ${pkgs.swayosd}/bin/swayosd-server  >/dev/null 2>&1 &
@@ -378,6 +379,38 @@ in
       ) &
 
       echo "[$(date +%Y-%m-%d\ %H:%M:%S)] autostart dispatch done"
+    '';
+  };
+
+  # ─── SNI orphan fixer ──────────────────────────────────────────────
+  # waybar's tray only shows apps that registered themselves with the
+  # StatusNotifierWatcher. v2rayN owns a StatusNotifierItem bus name but
+  # never calls RegisterStatusNotifierItem, so its icon never appears —
+  # and any waybar restart orphans every such item again. This loop finds
+  # unregistered SNI names on the bus and registers them with whatever
+  # watcher is currently live.
+  xdg.configFile."hypr/scripts/sni-fixer.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      BUSCTL=${pkgs.dbus}/bin/busctl
+
+      while true; do
+          items=$($BUSCTL --user get-property org.kde.StatusNotifierWatcher \
+              /StatusNotifierWatcher org.kde.StatusNotifierWatcher \
+              RegisteredStatusNotifierItems 2>/dev/null) || items=""
+          $BUSCTL --user list 2>/dev/null \
+              | awk '/^(org\.kde|org\.freedesktop)\.StatusNotifierItem-/ {print $1}' \
+              | while read -r name; do
+                  case "$items" in
+                      *"$name"*) ;;
+                      *) $BUSCTL --user call org.kde.StatusNotifierWatcher \
+                          /StatusNotifierWatcher org.kde.StatusNotifierWatcher \
+                          RegisterStatusNotifierItem s "$name" >/dev/null 2>&1 ;;
+                  esac
+              done
+          sleep 10
+      done
     '';
   };
 

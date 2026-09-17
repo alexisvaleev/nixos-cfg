@@ -104,6 +104,13 @@ in
   hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
 
+  # The Realtek RTL8761 BT radio (0bda:a725) repeatedly tx-timeouts and
+  # resets itself under USB autosuspend, which has been seen to wedge the
+  # shared USB controller. Keep this specific device fully awake.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="a725", TEST=="power/control", ATTR{power/control}="on"
+  '';
+
   # ─── Ollama (local embeddings backend for Gnostis MCP) ──────────────
   # Exposes OpenAI-compatible /v1/embeddings on http://localhost:11434/v1
   services.ollama = {
