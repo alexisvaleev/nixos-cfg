@@ -165,6 +165,37 @@
     '';
   };
 
+  # ─── Combined system stats (one waybar cell) ────────────────────────
+  # " cpu%  mem%  temp°" — cpu delta is stored between polls in /tmp.
+  xdg.configFile."hypr/scripts/sysstats.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      f=/tmp/sysstat-cpu
+      read -r _ u n s i iw io st _ < /proc/stat
+      t=$((u+n+s+i+iw+io+st)); idl=$((i+iw))
+      cpu=0
+      if [ -f "$f" ]; then
+          read -r pt pidl < "$f"
+          dt=$((t-pt)); di=$((idl-pidl))
+          [ "$dt" -gt 0 ] && cpu=$(( (dt-di)*100/dt ))
+      fi
+      echo "$t $idl" > "$f"
+
+      mem=$(awk '/MemTotal/{T=$2} /MemAvailable/{A=$2} END{printf "%d",(T-A)*100/T}' /proc/meminfo)
+
+      tmax=0
+      for z in /sys/class/thermal/thermal_zone*/temp; do
+          v=$(cat "$z" 2>/dev/null) || continue
+          [ "$v" -gt "$tmax" ] && tmax=$v
+      done
+      temp=$((tmax/1000))
+
+      printf '%s %s%%  %s %s%%  %s %s°\n' \
+          $'\uf2db' "$cpu" $'\uf538' "$mem" $'\uf2c9' "$temp"
+    '';
+  };
+
   # ─── Weather (waybar module, wttr.in) ───────────────────────────────
   xdg.configFile."hypr/scripts/weather.sh" = {
     executable = true;

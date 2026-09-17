@@ -47,7 +47,7 @@ in
 
       modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
       modules-center = [ "clock" ];
-      modules-right = [ "custom/weather" "group/player" "cpu" "memory" "temperature" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "tray" "custom/control" "custom/power" ];
+      modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "tray" "custom/control" "custom/power" ];
 
       "custom/logo" = {
         format = "${ic.logo}";
@@ -170,22 +170,12 @@ in
         tooltip = false;
       };
 
-      "cpu" = {
-        format = "${ic.cpu} {usage}%";
+      # Single cell: cpu% mem% temp° (sysstats.sh), click opens btop.
+      "custom/sysstats" = {
+        exec = "~/.config/hypr/scripts/sysstats.sh";
+        interval = 3;
         on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
-        tooltip = false;
-      };
-
-      "memory" = {
-        format = "${ic.mem} {percentage}%";
-        on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
-        tooltip = false;
-      };
-
-      "temperature" = {
-        format = "${ic.temp} {temperatureC}°";
-        on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
-        tooltip = false;
+        tooltip-format = "cpu · ram · temp — btop";
       };
 
       "custom/weather" = {
@@ -266,7 +256,7 @@ in
       #custom-logo, #custom-appname, #hyprland-workspaces, #hyprland-language,
       #pulseaudio, #network, #bluetooth, #battery, #tray, #clock,
       #custom-control, #custom-power,
-      #mpris, #cpu, #memory, #temperature, #custom-weather, #custom-caffeine {
+      #mpris, #custom-sysstats, #custom-weather, #custom-caffeine {
           padding: 0 10px;
           margin: 0;
           background-color: transparent;
@@ -276,7 +266,7 @@ in
 
       #custom-logo, #pulseaudio, #network, #bluetooth, #battery,
       #custom-control, #custom-power, #hyprland-language,
-      #mpris, #cpu, #memory, #temperature, #custom-weather, #custom-caffeine {
+      #mpris, #custom-sysstats, #custom-weather, #custom-caffeine {
           font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
       }
 
@@ -348,9 +338,7 @@ in
       #bluetooth   { color: @blue; }
       #battery     { color: @green; }
       #mpris        { color: @purple; }
-      #cpu          { color: @blue; }
-      #memory       { color: @mauve; }
-      #temperature  { color: @yellow; }
+      #custom-sysstats  { color: @blue; }
       #custom-weather   { color: @blue; }
       #custom-caffeine  { color: @subtext; }
       #custom-caffeine.on { color: @green; }
@@ -393,9 +381,7 @@ in
       #clock:hover,
       #hyprland-language:hover,
       #mpris:hover,
-      #cpu:hover,
-      #memory:hover,
-      #temperature:hover,
+      #custom-sysstats:hover,
       #custom-weather:hover,
       #custom-caffeine:hover {
           background-color: @surface2;
@@ -457,8 +443,8 @@ in
       window#waybar #pulseaudio, window#waybar #network, window#waybar #bluetooth,
       window#waybar #battery, window#waybar #tray, window#waybar #clock,
       window#waybar #custom-control, window#waybar #custom-power,
-      window#waybar #mpris, window#waybar #cpu, window#waybar #memory,
-      window#waybar #temperature, window#waybar #custom-weather,
+      window#waybar #mpris, window#waybar #custom-sysstats,
+      window#waybar #custom-weather,
       window#waybar #custom-caffeine {
           padding-left: ''${MOD_PAD}px;
           padding-right: ''${MOD_PAD}px;
@@ -470,8 +456,8 @@ in
       window#waybar #custom-control, window#waybar #custom-power,
       window#waybar #custom-appname, window#waybar #pulseaudio,
       window#waybar #battery, window#waybar #hyprland-language, window#waybar #clock,
-      window#waybar #mpris, window#waybar #cpu, window#waybar #memory,
-      window#waybar #temperature, window#waybar #custom-weather,
+      window#waybar #mpris, window#waybar #custom-sysstats,
+      window#waybar #custom-weather,
       window#waybar #custom-caffeine {
           min-height: ''${mh}px;
           padding-top: ''${ICON_PAD}px;
