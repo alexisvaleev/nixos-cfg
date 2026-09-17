@@ -374,8 +374,14 @@ in
       nohup wl-paste --type text  --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
-      if command -v TgWsProxy >/dev/null 2>&1; then
-          nohup TgWsProxy                       >/dev/null 2>&1 &
+      # Proxy helpers. v2rayN lives in the HM profile; TgWsProxy is a
+      # hand-managed PyInstaller binary in ~/.local/bin which is NOT on
+      # the session PATH — so use absolute paths and pgrep guards.
+      pgrep -x v2rayN >/dev/null 2>&1 || \
+          nohup ${pkgs.v2rayn}/bin/v2rayN         >/dev/null 2>&1 &
+      if [ -x "$HOME/.local/bin/TgWsProxy" ]; then
+          pgrep -f 'TgWsProxy-bin' >/dev/null 2>&1 || \
+              nohup "$HOME/.local/bin/TgWsProxy"  >/dev/null 2>&1 &
       fi
 
       # Night light switches itself on in the evening (20:00–07:00).
