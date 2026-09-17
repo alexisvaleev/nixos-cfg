@@ -135,14 +135,14 @@ in
       };
 
       "mpris" = {
-        format = "${ic.music} {artist} - {title}";
-        format-paused = "${ic.music} {artist} - {title}";
-        max-length = 35;
-        on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
+        format = "${ic.music} {artist}";
+        format-paused = "${ic.music} {artist}";
+        max-length = 25;
+        on-click = "~/.config/hypr/scripts/player-raise.sh";
         on-click-middle = "${pkgs.playerctl}/bin/playerctl stop";
         on-scroll-up = "${pkgs.playerctl}/bin/playerctl position 10+";
         on-scroll-down = "${pkgs.playerctl}/bin/playerctl position 10-";
-        tooltip-format = "{player}: {position} / {length}";
+        tooltip-format = "{player}: {artist} - {title} ({position} / {length})";
       };
 
       "custom/player-prev" = {

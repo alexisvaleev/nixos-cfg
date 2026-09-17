@@ -147,6 +147,24 @@
     '';
   };
 
+  # ─── Raise the window the track is playing from ─────────────────────
+  # Maps the mpris player name ("firefox.instance_1_x" -> "firefox") to a
+  # Hyprland client class and focuses that window.
+  xdg.configFile."hypr/scripts/player-raise.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      p=$(${pkgs.playerctl}/bin/playerctl -l 2>/dev/null | head -1)
+      [ -z "$p" ] && exit 0
+      base=$(printf '%s' "$p" | cut -d. -f1)
+      addr=$(hyprctl clients -j | ${pkgs.jq}/bin/jq -r --arg p "$base" \
+          '.[] | select(.class | ascii_downcase | contains($p | ascii_downcase)) | .address' \
+          | head -1)
+      [ -n "$addr" ] && [ "$addr" != "null" ] && \
+          hyprctl dispatch focuswindow "address:$addr"
+    '';
+  };
+
   # ─── Weather (waybar module, wttr.in) ───────────────────────────────
   xdg.configFile."hypr/scripts/weather.sh" = {
     executable = true;
