@@ -97,12 +97,33 @@ in
         }
       ];
     };
+
+    # Per-device volume memory: WirePlumber stores routes (volume, mute,
+    # channel volumes) per device in ~/.local/state/wireplumber and restores
+    # them when the device reconnects — e.g. BT headphones keep their own
+    # volume, independent from speakers. New devices otherwise start at ~6%.
+    wireplumber.extraConfig."90-device-state" = {
+      "wireplumber.settings" = {
+        "device.restore-profile" = true;
+        "device.restore-routes" = true;
+        "node.restore-default-targets" = true;
+        "bluetooth.use-persistent-storage" = true;
+        "device.routes.default-sink-volume" = 0.4;
+      };
+    };
   };
 
   # ─── Bluetooth ──────────────────────────────────────────────────────
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
+
+  # Auto-connect trusted/paired devices (e.g. the realme Buds) when they
+  # come in range, and power the adapter at boot.
+  hardware.bluetooth.settings = {
+    General.AutoEnable = true;
+    Policy.AutoConnect = true;
+  };
 
   # The Realtek RTL8761 BT radio (0bda:a725) repeatedly tx-timeouts and
   # resets itself under USB autosuspend, which has been seen to wedge the
