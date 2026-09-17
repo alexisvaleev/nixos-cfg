@@ -130,6 +130,23 @@
     '';
   };
 
+  # ─── Player control buttons (waybar mpris drawer) ───────────────────
+  # Prints the glyph for each button; "play" reflects playerctl status.
+  xdg.configFile."hypr/scripts/player-buttons.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      s=$(${pkgs.playerctl}/bin/playerctl status 2>/dev/null)
+      [ -z "$s" ] && exit 0   # no player -> empty module
+      case "$1" in
+          play) [ "$s" = "Playing" ] && printf '⏸' || printf '▶' ;;
+          prev) printf '⏮' ;;
+          next) printf '⏭' ;;
+          stop) printf '⏹' ;;
+      esac
+    '';
+  };
+
   # ─── Weather (waybar module, wttr.in) ───────────────────────────────
   xdg.configFile."hypr/scripts/weather.sh" = {
     executable = true;
