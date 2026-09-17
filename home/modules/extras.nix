@@ -192,7 +192,7 @@
       temp=$((tmax/1000))
 
       printf '%s %s%%  %s %s%%  %s %s°\n' \
-          $'\uf2db' "$cpu" $'\uf538' "$mem" $'\uf2c9' "$temp"
+          $'\uf2db' "$cpu" $'\U000f035b' "$mem" $'\uf2c9' "$temp"
     '';
   };
 
