@@ -83,7 +83,9 @@ in
       # Reload consumers.
       hyprctl reload >/dev/null 2>&1 || true
       if pidof waybar >/dev/null 2>&1; then
-          pkill -USR1 waybar 2>/dev/null || pkill -x waybar >/dev/null 2>&1 || true
+          # SIGUSR2 = reload CSS only. SIGUSR1 would TOGGLE the bar's
+          # visibility and hide it — that was the "bar disappeared" bug.
+          pkill -USR2 -f 'waybar-wrapped' 2>/dev/null || true
       fi
       if pidof swaync >/dev/null 2>&1; then
           swaync-client -R 2>/dev/null || pkill -HUP swaync >/dev/null 2>&1 || true
