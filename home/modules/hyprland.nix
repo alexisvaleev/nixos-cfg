@@ -373,7 +373,10 @@ in
       nohup ~/.config/hypr/scripts/sni-fixer.sh >/dev/null 2>&1 &
       nohup nm-applet --indicator               >/dev/null 2>&1 &
       nohup GSK_RENDERER=cairo ${pkgs.swaynotificationcenter}/bin/swaync >/dev/null 2>&1 &
-      nohup ${pkgs.swayosd}/bin/swayosd-server  >/dev/null 2>&1 &
+      # GDK_BACKEND=wayland: without it GTK can silently fall back to
+      # X11 when started early in the session, and the OSD then opens as
+      # huge tiled xwayland windows instead of a layer-shell overlay.
+      nohup env GDK_BACKEND=wayland ${pkgs.swayosd}/bin/swayosd-server >/dev/null 2>&1 &
       nohup wl-paste --type text  --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
