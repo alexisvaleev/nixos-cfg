@@ -17,6 +17,7 @@ let
     # bluetooth
     btOff      = nf "f293";  # nf-fa-bluetooth_b
     btOn       = nf "f294";  # nf-fa-bluetooth
+    headphones = nf "f025";  # nf-fa-headphones
     # battery
     bat        = [ (nf "f244") (nf "f243") (nf "f242") (nf "f241") (nf "f240") ];
     batCharge  = nf "f0e7";  # nf-fa-bolt
@@ -103,7 +104,7 @@ in
 
       "bluetooth" = {
         format = "${ic.btOff}";
-        format-connected = "${ic.btOn} {device_alias} {device_battery_percentage}%";
+        format-connected = "${ic.btOn} ${ic.headphones} {device_battery_percentage}%";
         format-off = "${ic.btOff}";
         on-click = "rofi-bluetooth";
         tooltip = false;
