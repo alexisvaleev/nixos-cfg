@@ -120,10 +120,10 @@ in
 
   # Auto-connect trusted/paired devices (e.g. the realme Buds) when they
   # come in range, and power the adapter at boot.
-  hardware.bluetooth.settings = {
-    General.AutoEnable = true;
-    Policy.AutoConnect = true;
-  };
+  # AutoEnable powers the adapter at boot; trusted/paired devices
+  # reconnect automatically via bluetoothd (there is no "AutoConnect"
+  # main.conf key — the daemon ignores it and logs "Unknown key").
+  hardware.bluetooth.settings.Policy.AutoEnable = true;
 
   # The Realtek RTL8761 BT radio (0bda:a725) repeatedly tx-timeouts and
   # resets itself under USB autosuspend, which has been seen to wedge the
@@ -131,6 +131,28 @@ in
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="a725", TEST=="power/control", ATTR{power/control}="on"
   '';
+
+  # ─── Memory pressure / freeze resilience ────────────────────────────
+  # No disk swap on this box. A hard freeze with an abruptly-truncated
+  # journal is the signature of an OOM live-lock: every CPU stuck in
+  # direct reclaim, journald never scheduled. zram gives cheap
+  # compressed swap (~2-3x effective); earlyoom kills the memory hog
+  # before the system wedges completely.
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+  };
+
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;
+    freeSwapThreshold = 10;
+  };
+
+  # Breadcrumb for the next hang: log kernel tasks blocked >120s so the
+  # journal captures *something* instead of cutting off silently.
+  boot.kernel.sysctl."kernel.hung_task_timeout_secs" = 120;
 
   # ─── Ollama (local embeddings backend for Gnostis MCP) ──────────────
   # Exposes OpenAI-compatible /v1/embeddings on http://localhost:11434/v1
