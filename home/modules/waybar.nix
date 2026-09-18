@@ -247,7 +247,7 @@ in
       }
 
       window#waybar {
-          background-color: alpha(@bg, 0.65);
+          background-color: transparent;
           border-radius: 0;
       }
 
@@ -279,14 +279,14 @@ in
           min-height: 22px;
           margin: 3px 2px;
           padding: 0;
-          border-radius: 4px;
-          color: @subtext;
-          background-color: transparent;
-          font-weight: 500;
+          border-radius: 999px;
+          color: @text;
+          background-color: alpha(@purple, 0.35);
+          font-weight: 600;
       }
 
       #workspaces button:hover {
-          background-color: @surface2;
+          background-color: alpha(@purple, 0.6);
           color: @text;
       }
 
@@ -294,7 +294,6 @@ in
       #workspaces button.visible {
           background-color: @purple;
           color: @bg;
-          font-weight: 600;
       }
 
       #workspaces button.urgent {
