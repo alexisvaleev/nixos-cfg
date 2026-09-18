@@ -254,8 +254,9 @@ in
     hl.bind(mainMod .. " + SHIFT + Print", hl.dsp.exec_cmd("~/.config/hypr/scripts/record.sh"))
     hl.bind(mainMod .. " + ALT + V",      hl.dsp.exec_cmd("${pkgs.pwvucontrol}/bin/pwvucontrol"))
 
-    -- screenshots (grim + slurp + swappy)
-    hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh swappy"))
+    -- screenshots (grim + slurp; swappy annotator on SUPER+ALT+S only)
+    hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area-clip"))
+    hl.bind(mainMod .. " + ALT + S",   hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh swappy"))
     hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh full-clip"))
     hl.bind("Print",                   hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh area-clip"))
     hl.bind("CTRL + Print",            hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh full-file"))
