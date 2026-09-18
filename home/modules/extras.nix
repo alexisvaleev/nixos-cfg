@@ -196,6 +196,26 @@
     '';
   };
 
+  # ─── Clock with Russian day/month names ─────────────────────────────
+  # The system only ships en_US locale, so the built-in clock can only
+  # print English names — hardcode Russian ones instead:
+  # "10:15   18 сентября, четверг".
+  xdg.configFile."hypr/scripts/clock.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      case "$(date +%-m)" in
+          1) m=января;; 2) m=февраля;; 3) m=марта;; 4) m=апреля;; 5) m=мая;; 6) m=июня;;
+          7) m=июля;; 8) m=августа;; 9) m=сентября;; 10) m=октября;; 11) m=ноября;; 12) m=декабря;;
+      esac
+      case "$(date +%u)" in
+          1) w=понедельник;; 2) w=вторник;; 3) w=среда;; 4) w=четверг;; 5) w=пятница;; 6) w=суббота;; 7) w=воскресенье;;
+      esac
+      printf '{"text":"%s   %s %s, %s","tooltip":"%s"}\n' \
+          "$(date +%H:%M)" "$(date +%-d)" "$m" "$w" "$(date '+%d.%m.%Y, неделя %V')"
+    '';
+  };
+
   # ─── Weather (waybar module, wttr.in) ───────────────────────────────
   xdg.configFile."hypr/scripts/weather.sh" = {
     executable = true;

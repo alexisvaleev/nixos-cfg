@@ -46,7 +46,7 @@ in
       spacing = 0;
 
       modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
-      modules-center = [ "clock" ];
+      modules-center = [ "custom/clock" ];
       modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "tray" "custom/control" "custom/power" ];
 
       "custom/logo" = {
@@ -199,26 +199,11 @@ in
         show-passive-items = true;
       };
 
-      "clock" = {
-        format = "{:%a %d %b   %H:%M}";
-        tooltip-format = "<tt>{calendar}</tt>";
-        calendar = {
-          mode = "month";
-          mode-mon-col = 3;
-          weeks-pos = "right";
-          on-scroll = 1;
-          format = {
-            months = "";
-            days = "<b>{}</b>";
-            weeks = "<span color='${theme.subtext}'><b>W{}</b></span>";
-            today = "<span color='${theme.purple}'><b><u>{}</u></b></span>";
-          };
-        };
-        actions = {
-          on-click-right = "mode";
-          on-scroll-forward = "shift";
-          on-scroll-backward = "shift";
-        };
+      "custom/clock" = {
+        exec = "~/.config/hypr/scripts/clock.sh";
+        "return-type" = "json";
+        interval = 5;
+        tooltip = true;
       };
 
       "custom/control" = {
@@ -254,7 +239,7 @@ in
       window#waybar.hidden { opacity: 0.2; }
 
       #custom-logo, #custom-appname, #hyprland-workspaces, #hyprland-language,
-      #pulseaudio, #network, #bluetooth, #battery, #tray, #clock,
+      #pulseaudio, #network, #bluetooth, #battery, #tray, #custom-clock,
       #custom-control, #custom-power,
       #mpris, #custom-sysstats, #custom-weather, #custom-caffeine {
           padding: 0 10px;
@@ -326,7 +311,7 @@ in
           padding-left: 0;
       }
 
-      #clock {
+      #custom-clock {
           color: #ffffff;
           font-weight: 600;
           font-size: 13px;
@@ -377,7 +362,7 @@ in
       #battery:hover,
       #custom-control:hover,
       #tray:hover,
-      #clock:hover,
+      #custom-clock:hover,
       #hyprland-language:hover,
       #mpris:hover,
       #custom-sysstats:hover,
@@ -440,7 +425,7 @@ in
       window#waybar #custom-logo, window#waybar #custom-appname,
       window#waybar #hyprland-workspaces, window#waybar #hyprland-language,
       window#waybar #pulseaudio, window#waybar #network, window#waybar #bluetooth,
-      window#waybar #battery, window#waybar #tray, window#waybar #clock,
+      window#waybar #battery, window#waybar #tray, window#waybar #custom-clock,
       window#waybar #custom-control, window#waybar #custom-power,
       window#waybar #mpris, window#waybar #custom-sysstats,
       window#waybar #custom-weather,
@@ -454,7 +439,7 @@ in
       window#waybar #custom-logo, window#waybar #network, window#waybar #bluetooth,
       window#waybar #custom-control, window#waybar #custom-power,
       window#waybar #custom-appname, window#waybar #pulseaudio,
-      window#waybar #battery, window#waybar #hyprland-language, window#waybar #clock,
+      window#waybar #battery, window#waybar #hyprland-language, window#waybar #custom-clock,
       window#waybar #mpris, window#waybar #custom-sysstats,
       window#waybar #custom-weather,
       window#waybar #custom-caffeine {
