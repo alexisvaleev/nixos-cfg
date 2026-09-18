@@ -19,6 +19,28 @@ in
   # Stable wallpaper location, used by hyprpaper + hyprlock.
   xdg.dataFile."backgrounds/wallpaper.jpg".source = ../../assets/wallpaper.jpg;
 
+  # Auto-rotate: every 30 min pick a random image from
+  # ~/Pictures/wallpapers, apply it and regenerate the matugen palette.
+  # With one file it just re-applies the same wallpaper — drop more
+  # images into the dir to make rotation meaningful.
+  systemd.user.services.wallpaper-rotate = {
+    Unit.Description = "Rotate wallpaper + matugen theme";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.config/hypr/scripts/wallpaper.sh";
+    };
+  };
+
+  systemd.user.timers.wallpaper-rotate = {
+    Unit.Description = "Periodic wallpaper rotation";
+    Timer = {
+      OnBootSec = "10min";
+      OnUnitActiveSec = "30min";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
+  };
+
   xdg.configFile."hypr/scripts/wallpaper.sh" = {
     executable = true;
     text = ''

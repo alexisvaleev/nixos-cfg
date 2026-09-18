@@ -245,6 +245,7 @@ in
     hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("~/.config/hypr/scripts/clipboard.sh"))
     hl.bind(mainMod .. " + period",    hl.dsp.exec_cmd("${pkgs.rofimoji}/bin/rofimoji"))
     hl.bind(mainMod .. " + CTRL + W",  hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh --pick"))
+    hl.bind(mainMod .. " + ALT + W",   hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh"))
     hl.bind(mainMod .. " + CTRL + T",  hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar-tune"))
 
     -- extras: keybind cheatsheet, night light, screen record, mixer
