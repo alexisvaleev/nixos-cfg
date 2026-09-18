@@ -123,7 +123,13 @@ in
   # AutoEnable powers the adapter at boot; trusted/paired devices
   # reconnect automatically via bluetoothd (there is no "AutoConnect"
   # main.conf key — the daemon ignores it and logs "Unknown key").
-  hardware.bluetooth.settings.Policy.AutoEnable = true;
+  hardware.bluetooth.settings = {
+    Policy.AutoEnable = true;
+    # Exposes org.bluez.Battery1 on devices that report charge (HFP
+    # battery indicator / BLE Battery Service) — waybar's
+    # {device_battery_percentage} reads exactly this.
+    General.Experimental = true;
+  };
 
   # The Realtek RTL8761 BT radio (0bda:a725) repeatedly tx-timeouts and
   # resets itself under USB autosuspend, which has been seen to wedge the

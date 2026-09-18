@@ -103,7 +103,7 @@ in
 
       "bluetooth" = {
         format = "${ic.btOff}";
-        format-connected = "${ic.btOn}";
+        format-connected = "${ic.btOn} {device_alias} {device_battery_percentage}%";
         format-off = "${ic.btOff}";
         on-click = "rofi-bluetooth";
         tooltip = false;
