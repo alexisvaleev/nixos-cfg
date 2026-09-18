@@ -203,6 +203,7 @@ in
         exec = "~/.config/hypr/scripts/clock.sh";
         "return-type" = "json";
         interval = 5;
+        on-click = "${pkgs.gsimplecal}/bin/gsimplecal";
         tooltip = true;
       };
 

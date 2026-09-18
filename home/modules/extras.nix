@@ -8,6 +8,7 @@
     pwvucontrol    # per-app volume mixer
     playerctl      # mpris control for waybar clicks
     btop           # task manager (opened from waybar sys modules)
+    gsimplecal     # month calendar popup (waybar clock click)
   ];
 
   # ─── Keybind cheatsheet (SUPER+/) ───────────────────────────────────
