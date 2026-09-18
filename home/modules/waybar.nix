@@ -247,7 +247,7 @@ in
       }
 
       window#waybar {
-          background-color: transparent;
+          background-color: alpha(@bg, 0.35);
           border-radius: 0;
       }
 
