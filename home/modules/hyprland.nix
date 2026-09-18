@@ -367,6 +367,15 @@ in
       # Kill any stray notification daemon before swaync grabs the name.
       pkill -f 'mako|dunst' 2>/dev/null || true
 
+      # The hyprland portal dbus-activates before the session env reaches
+      # systemd, crash-loops on "couldn't connect to a wayland
+      # compositor", hits start-limit and stays dead -> no screen share.
+      # Restart it once the compositor is guaranteed to be up.
+      ( systemctl --user reset-failed xdg-desktop-portal-hyprland
+        sleep 1
+        systemctl --user restart xdg-desktop-portal-hyprland
+      ) >/dev/null 2>&1 &
+
       # Then the rest of the desktop.
       pgrep -f 'waybar-wrapped' >/dev/null 2>&1 || \
           nohup waybar                          >/dev/null 2>&1 &
