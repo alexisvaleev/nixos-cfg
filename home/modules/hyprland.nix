@@ -1,11 +1,7 @@
 # Hyprland configuration (Lua format, 0.55+) + screenshot helper script.
-{ config, pkgs, lib, osConfig ? {}, ... }:
+{ config, pkgs, lib, ... }:
 let
   theme = import ./theme.nix;
-  # Software cursor was only needed for the NVIDIA desktop — everywhere
-  # else (Intel etc.) it makes pointer movement feel heavy/laggy, which
-  # reads as "the display isn't really 240 Hz".
-  softwareCursor = (osConfig.networking.hostName or "") == "desktop";
 in
 {
   # ─── Hyprland Lua config ───────────────────────────────────────────
@@ -84,7 +80,13 @@ in
 
     hl.config({
         cursor = {
-            no_hardware_cursors = ${if softwareCursor then "true" else "false"},
+            -- nouveau's hw cursor vanishes when idle; other drivers are
+            -- fine. Detect the loaded module at runtime — the same SSD
+            -- boots on different machines, hostname can't tell them apart.
+            no_hardware_cursors = (function()
+                local ok = os.execute("test -d /sys/module/nouveau -o -d /sys/module/nvidia")
+                return ok == true or ok == 0
+            end)(),
         },
         general = {
             gaps_in  = 4,
