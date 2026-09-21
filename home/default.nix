@@ -21,6 +21,7 @@
     ./modules/icons-cursor.nix
     ./modules/osd.nix
     ./modules/extras.nix
+    ./modules/quickshell.nix
   ];
 
   # small extra CLI utilities

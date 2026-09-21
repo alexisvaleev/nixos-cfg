@@ -139,7 +139,7 @@ in
         format = "${ic.music} {artist}";
         format-paused = "${ic.music} {artist}";
         max-length = 25;
-        on-click = "~/.config/hypr/scripts/player-raise.sh";
+        on-click = "${pkgs.quickshell}/bin/qs -c player ipc call player toggle";
         on-click-middle = "${pkgs.playerctl}/bin/playerctl stop";
         on-scroll-up = "${pkgs.playerctl}/bin/playerctl position 10+";
         on-scroll-down = "${pkgs.playerctl}/bin/playerctl position 10-";

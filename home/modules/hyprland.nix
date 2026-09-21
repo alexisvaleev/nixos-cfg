@@ -390,6 +390,8 @@ in
       # X11 when started early in the session, and the OSD then opens as
       # huge tiled xwayland windows instead of a layer-shell overlay.
       nohup env GDK_BACKEND=wayland ${pkgs.swayosd}/bin/swayosd-server >/dev/null 2>&1 &
+      # Quickshell player popup (hidden until the waybar click toggles it).
+      nohup ${pkgs.quickshell}/bin/qs -c player >/dev/null 2>&1 &
       nohup wl-paste --type text  --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
