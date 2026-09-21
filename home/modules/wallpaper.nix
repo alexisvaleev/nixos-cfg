@@ -16,8 +16,10 @@ in
     wallpaper=eDP-1,${wall}
   '';
 
-  # Stable wallpaper location, used by hyprpaper + hyprlock.
-  xdg.dataFile."backgrounds/wallpaper.jpg".source = ../../assets/wallpaper.jpg;
+  # Stable wallpaper location, used by hyprpaper + hyprlock. NOT managed
+  # by HM: wallpaper.sh --init creates the symlink and later picks point
+  # it at the chosen file — a managed link collides and aborts the whole
+  # activation ("Existing file would be clobbered").
 
   # Auto-rotate: every 30 min pick a random image from
   # ~/Pictures/wallpapers, apply it and regenerate the matugen palette.

@@ -437,7 +437,11 @@ in
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      BUSCTL=${pkgs.dbus}/bin/busctl
+      # NOTE: busctl ships with systemd — pkgs.dbus has no busctl, so the
+      # old pin pointed at a nonexistent store path and every call failed
+      # silently (the fixer looped forever doing nothing).
+      BUSCTL=${pkgs.systemd}/bin/busctl
+      LOG=/tmp/sni-fixer.log
 
       while true; do
           items=$($BUSCTL --user get-property org.kde.StatusNotifierWatcher \
@@ -448,9 +452,10 @@ in
               | while read -r name; do
                   case "$items" in
                       *"$name"*) ;;
-                      *) $BUSCTL --user call org.kde.StatusNotifierWatcher \
+                      *) echo "$(date '+%F %T') re-register $name" >> "$LOG"
+                         $BUSCTL --user call org.kde.StatusNotifierWatcher \
                           /StatusNotifierWatcher org.kde.StatusNotifierWatcher \
-                          RegisterStatusNotifierItem s "$name" >/dev/null 2>&1 ;;
+                          RegisterStatusNotifierItem s "$name" >>"$LOG" 2>&1 ;;
                   esac
               done
           sleep 10
