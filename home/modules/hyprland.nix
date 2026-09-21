@@ -1,7 +1,11 @@
 # Hyprland configuration (Lua format, 0.55+) + screenshot helper script.
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, osConfig ? {}, ... }:
 let
   theme = import ./theme.nix;
+  # Software cursor was only needed for the NVIDIA desktop — everywhere
+  # else (Intel etc.) it makes pointer movement feel heavy/laggy, which
+  # reads as "the display isn't really 240 Hz".
+  softwareCursor = (osConfig.networking.hostName or "") == "desktop";
 in
 {
   # ─── Hyprland Lua config ───────────────────────────────────────────
@@ -80,7 +84,7 @@ in
 
     hl.config({
         cursor = {
-            no_hardware_cursors = true,
+            no_hardware_cursors = ${if softwareCursor then "true" else "false"},
         },
         general = {
             gaps_in  = 4,
