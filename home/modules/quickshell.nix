@@ -134,10 +134,23 @@
                             elide: Text.ElideRight
                         }
 
-                        // ── Progress bar + seek ──────────────────
+                        // ── Progress bar + drag-to-seek ───────────────
+                        // dragFrac >= 0 while dragging: the thumb follows
+                        // the mouse live, and the actual seek is committed
+                        // once on release (players dislike seek spam).
                         Item {
+                            id: prog
                             Layout.fillWidth: true
                             Layout.preferredHeight: 16
+                            property real dragFrac: -1
+
+                            readonly property real frac: {
+                                const p = root.player;
+                                if (!p || !(p.length > 0)) return 0;
+                                return Math.max(0, Math.min(1, p.position / p.length));
+                            }
+                            readonly property real shownFrac:
+                                dragFrac >= 0 ? dragFrac : frac
 
                             Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -150,22 +163,39 @@
                                     height: parent.height
                                     radius: 3
                                     color: "#a78bfa"
-                                    width: {
-                                        const p = root.player;
-                                        if (!p || !(p.length > 0)) return 0;
-                                        return parent.width
-                                             * Math.max(0, Math.min(1, p.position / p.length));
-                                    }
+                                    width: parent.width * prog.shownFrac
                                 }
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: (m) => {
-                                        const p = root.player;
-                                        if (p && p.canSeek && p.length > 0)
-                                            p.setPosition(p.length * m.x / width);
-                                    }
+                                // Thumb — grows a bit while dragging.
+                                Rectangle {
+                                    width: prog.dragFrac >= 0 ? 14 : 10
+                                    height: width
+                                    radius: width / 2
+                                    color: "#c4b5fd"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: Math.max(0, Math.min(parent.width - width,
+                                        parent.width * prog.shownFrac - width / 2))
                                 }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                function fracAt(x: real): real {
+                                    return Math.max(0, Math.min(1, x / width));
+                                }
+                                onPressed: (m) => prog.dragFrac = fracAt(m.x)
+                                onPositionChanged: (m) => {
+                                    if (pressed) prog.dragFrac = fracAt(m.x);
+                                }
+                                onReleased: {
+                                    const p = root.player;
+                                    if (p && p.canSeek && p.length > 0 && prog.dragFrac >= 0)
+                                        p.setPosition(p.length * prog.dragFrac);
+                                    prog.dragFrac = -1;
+                                }
+                                // If the pointer leaves while pressed, drop
+                                // the drag without seeking.
+                                onCanceled: prog.dragFrac = -1
                             }
                         }
 
@@ -174,7 +204,13 @@
                             spacing: 4
 
                             Text {
-                                text: root.fmtTime(root.player ? root.player.position : 0)
+                                text: {
+                                    const p = root.player;
+                                    if (!p) return "0:00";
+                                    if (prog.dragFrac >= 0 && p.length > 0)
+                                        return root.fmtTime(p.length * prog.dragFrac);
+                                    return root.fmtTime(p.position);
+                                }
                                 color: "#a0a0b0"
                                 font.pixelSize: 10
                             }
