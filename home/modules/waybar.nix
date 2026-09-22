@@ -132,7 +132,16 @@ in
           "transition-left-to-right" = false;
           "click-to-reveal" = false;
         };
-        modules = [ "mpris" "custom/player-prev" "custom/player-play" "custom/player-stop" "custom/player-next" ];
+        modules = [ "custom/player-toggle" "mpris" "custom/player-prev" "custom/player-play" "custom/player-stop" "custom/player-next" ];
+      };
+
+      # Permanent ♪ icon — the popup toggle anchor. The mpris module and
+      # the player-buttons.sh cells render empty when nothing plays, so
+      # without this the whole group vanishes and there's nothing to click.
+      "custom/player-toggle" = {
+        format = ic.music;
+        on-click = "${pkgs.quickshell}/bin/qs -c player ipc call player toggle";
+        tooltip = false;
       };
 
       "mpris" = {
@@ -330,7 +339,7 @@ in
       #custom-caffeine.on { color: @green; }
 
       /* Player drawer buttons — compact, purple accent. */
-      #custom-player-prev, #custom-player-play,
+      #custom-player-toggle, #custom-player-prev, #custom-player-play,
       #custom-player-stop, #custom-player-next {
           padding: 0 5px;
           min-height: 28px;

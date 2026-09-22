@@ -66,6 +66,24 @@
                 border.color: "#a78bfa"
                 border.width: 1
 
+                // Close button — the popup has no other way to dismiss
+                // itself when the bar cell is hidden (no player).
+                Text {
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 6
+                    text: "󰅖"
+                    color: "#a0a0b0"
+                    font.pixelSize: 14
+                    z: 10
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -6
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: win.visible = false
+                    }
+                }
+
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 14
