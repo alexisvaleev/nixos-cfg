@@ -6,6 +6,9 @@
   home.packages = with pkgs; [
     # messaging / browsers
     telegram-desktop
+    # Vesktop: Discord client with working Wayland screen share
+    # (portal + pipewire). Stock Discord can't share on Hyprland.
+    vesktop
     # editors
     vscode-fhs
     zed-editor
@@ -25,6 +28,22 @@
     networkmanager_dmenu
     rofi-bluetooth
   ];
+
+  # Vesktop through the local v2rayN proxy (Discord is unreachable
+  # without it — same proxy env as the stock-Discord wrapper).
+  home.file.".local/bin/vesktop" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env sh
+      export http_proxy="http://127.0.0.1:10809"
+      export https_proxy="http://127.0.0.1:10809"
+      export ALL_PROXY="http://127.0.0.1:10809"
+      # Devin/VS Code terminals leak ELECTRON_RUN_AS_NODE=1, which makes
+      # Electron run as plain node -> "Cannot find module 'electron'".
+      unset ELECTRON_RUN_AS_NODE ELECTRON_NO_ATTACH_CONSOLE
+      exec ${pkgs.vesktop}/bin/vesktop "$@"
+    '';
+  };
 
   # ─── Link proxy cores + geo data into v2rayN's bin directory ───────
   # v2rayN expects cores in ~/.local/share/v2rayN/bin/<name>/<binary>.
