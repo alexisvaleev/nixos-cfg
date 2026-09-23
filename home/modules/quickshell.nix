@@ -16,8 +16,11 @@
         id: root
 
         // Prefer the player that is actually playing; fall back to the
-        // first registered one.
-        readonly property var players: Mpris.players.values
+        // first registered one. playerctld is filtered out — it's a
+        // D-Bus proxy that sits in the player list permanently and
+        // reports canSeek=false / swallows SetPosition calls.
+        readonly property var players:
+            Mpris.players.values.filter(p => !p.dbusName.startsWith("playerctld"))
 
         function fmtTime(s) {
             s = Math.max(0, Math.floor(s));
@@ -180,6 +183,7 @@
 
                             MouseArea {
                                 anchors.fill: parent
+                                enabled: root.player !== null && root.player.canSeek
                                 function fracAt(x: real): real {
                                     return Math.max(0, Math.min(1, x / width));
                                 }
