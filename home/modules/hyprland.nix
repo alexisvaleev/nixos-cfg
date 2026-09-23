@@ -80,13 +80,10 @@ in
 
     hl.config({
         cursor = {
-            -- nouveau's hw cursor vanishes when idle; other drivers are
-            -- fine. Detect the loaded module at runtime — the same SSD
-            -- boots on different machines, hostname can't tell them apart.
-            no_hardware_cursors = (function()
-                local ok = os.execute("test -d /sys/module/nouveau -o -d /sys/module/nvidia")
-                return ok == true or ok == 0
-            end)(),
+            -- HW cursors vanish when idle on nouveau AND i915; the same
+            -- SSD boots on different machines, so just use software
+            -- cursors everywhere — the perf cost is negligible.
+            no_hardware_cursors = true,
         },
         general = {
             gaps_in  = 4,
