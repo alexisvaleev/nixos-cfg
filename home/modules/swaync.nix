@@ -14,6 +14,7 @@ let
     gear      = nf "f013";  # nf-fa-gear
     moon      = nf "f186";  # nf-fa-moon
     coffee    = nf "f0f4";  # nf-fa-coffee
+    netmenu   = nf "f6ff";  # nf-fa-network_wired
   };
 
   cfg = {
@@ -74,7 +75,7 @@ let
         text = "Do Not Disturb";
       };
       "buttons-grid" = {
-        buttons-per-row = 4;
+        buttons-per-row = 3;
         actions = [
           {
             label = "${ic.wifi}";
@@ -83,6 +84,12 @@ let
             command = "$HOME/.config/swaync/wifi-toggle.sh";
             update-command = "$HOME/.config/swaync/wifi-state.sh";
             tooltip = "Wi-Fi";
+          }
+          {
+            label = "${ic.netmenu}";
+            type = "normal";
+            command = "networkmanager_dmenu";
+            tooltip = "Network menu";
           }
           {
             label = "${ic.bluetooth}";

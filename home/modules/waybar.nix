@@ -48,7 +48,7 @@ in
 
       modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
       modules-center = [ "custom/clock" ];
-      modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "tray" "custom/control" "custom/power" ];
+      modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "bluetooth" "battery" "hyprland/language" "tray" "custom/control" "custom/power" ];
 
       "custom/logo" = {
         format = "${ic.logo}";
@@ -91,15 +91,6 @@ in
         on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
         scroll-step = 5;
         tooltip = false;
-      };
-
-      "network" = {
-        format-wifi = "${ic.wifi}";
-        format-ethernet = "${ic.ethernet}";
-        format-disconnected = "${ic.wifiOff}";
-        format-linked = "${ic.wifiOff}";
-        tooltip-format = "{ipaddr}";
-        on-click = "networkmanager_dmenu";
       };
 
       "bluetooth" = {
@@ -242,7 +233,7 @@ in
       window#waybar.hidden { opacity: 0.2; }
 
       #custom-logo, #custom-appname, #hyprland-workspaces, #hyprland-language,
-      #pulseaudio, #network, #bluetooth, #battery, #tray, #custom-clock,
+      #pulseaudio, #bluetooth, #battery, #tray, #custom-clock,
       #custom-control, #custom-power,
       #mpris, #custom-sysstats, #custom-weather {
           padding: 0 10px;
@@ -252,7 +243,7 @@ in
           min-height: 28px;
       }
 
-      #custom-logo, #pulseaudio, #network, #bluetooth, #battery,
+      #custom-logo, #pulseaudio, #bluetooth, #battery,
       #custom-control, #custom-power, #hyprland-language,
       #mpris, #custom-sysstats, #custom-weather {
           font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
@@ -321,7 +312,7 @@ in
       }
 
       #pulseaudio { color: @mauve; }
-      #network     { color: @blue; }
+
       #bluetooth   { color: @blue; }
       #battery     { color: @green; }
       #mpris        { color: @purple; }
@@ -359,7 +350,6 @@ in
       #custom-logo:hover,
       #custom-appname:hover,
       #pulseaudio:hover,
-      #network:hover,
       #bluetooth:hover,
       #battery:hover,
       #custom-control:hover,
@@ -368,8 +358,7 @@ in
       #hyprland-language:hover,
       #mpris:hover,
       #custom-sysstats:hover,
-      #custom-weather:hover,
-      #custom-caffeine:hover {
+      #custom-weather:hover {
           background-color: @surface2;
           border-radius: 4px;
       }
@@ -426,25 +415,23 @@ in
       /* waybar-tune overrides — regenerated, do not edit by hand. */
       window#waybar #custom-logo, window#waybar #custom-appname,
       window#waybar #hyprland-workspaces, window#waybar #hyprland-language,
-      window#waybar #pulseaudio, window#waybar #network, window#waybar #bluetooth,
+      window#waybar #pulseaudio, window#waybar #bluetooth,
       window#waybar #battery, window#waybar #tray, window#waybar #custom-clock,
       window#waybar #custom-control, window#waybar #custom-power,
       window#waybar #mpris, window#waybar #custom-sysstats,
-      window#waybar #custom-weather,
-      window#waybar #custom-caffeine {
+      window#waybar #custom-weather {
           padding-left: ''${MOD_PAD}px;
           padding-right: ''${MOD_PAD}px;
       }
       window#waybar #custom-logo    { padding-left: ''${LOGO_LEFT}px; }
       window#waybar #custom-appname { padding-left: ''${APP_LEFT}px; }
 
-      window#waybar #custom-logo, window#waybar #network, window#waybar #bluetooth,
+      window#waybar #custom-logo, window#waybar #bluetooth,
       window#waybar #custom-control, window#waybar #custom-power,
       window#waybar #custom-appname, window#waybar #pulseaudio,
       window#waybar #battery, window#waybar #hyprland-language, window#waybar #custom-clock,
       window#waybar #mpris, window#waybar #custom-sysstats,
-      window#waybar #custom-weather,
-      window#waybar #custom-caffeine {
+      window#waybar #custom-weather {
           min-height: ''${mh}px;
           padding-top: ''${ICON_PAD}px;
       }
