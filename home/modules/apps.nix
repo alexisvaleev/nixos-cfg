@@ -45,6 +45,23 @@
     '';
   };
 
+  # The package's own .desktop lands in the system profile only after
+  # nixos-rebuild, and it would launch vesktop without the proxy anyway.
+  # This entry goes through the wrapper above so Discord traffic uses v2rayN.
+  home.file.".local/share/applications/vesktop.desktop" = {
+    text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Vesktop
+      Comment=Discord client (via v2rayN proxy)
+      Exec=${config.home.homeDirectory}/.local/bin/vesktop %U
+      Icon=${pkgs.vesktop}/share/icons/hicolor/256x256/apps/vesktop.png
+      Categories=Network;InstantMessaging;Chat;
+      StartupWMClass=vesktop
+      MimeType=x-scheme-handler/discord;
+    '';
+  };
+
   # ─── Link proxy cores + geo data into v2rayN's bin directory ───────
   # v2rayN expects cores in ~/.local/share/v2rayN/bin/<name>/<binary>.
   # Xray loads geo data from its working directory (bin/ root), so the
