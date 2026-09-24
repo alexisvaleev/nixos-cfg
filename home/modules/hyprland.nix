@@ -405,7 +405,9 @@ in
       fi
 
       # Night light switches itself on in the evening (20:00–07:00).
-      ~/.config/hypr/scripts/nightlight.sh auto &
+      # `login` clears the manual-override flag left from a previous
+      # session, then applies the schedule.
+      ~/.config/hypr/scripts/nightlight.sh login &
 
       # hypridle needs the logind session to be registered, which happens
       # slightly after Hyprland is fully up.  Wait a bit, start it, then

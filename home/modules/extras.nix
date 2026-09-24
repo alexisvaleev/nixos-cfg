@@ -55,30 +55,62 @@
   };
 
   # ─── Night light toggle (SUPER+SHIFT+N) ─────────────────────────────
-  # `auto` mode is called from autostart: enables itself in the evening.
+  # `login` runs from autostart: clears the manual-override flag, then
+  # `auto` applies the schedule. `auto` is symmetric — it also turns the
+  # filter OFF during the day, so a wrong-clock login self-corrects on
+  # the next timer tick. Manual toggle/on/off set a flag that makes
+  # `auto` a no-op until next login.
   xdg.configFile."hypr/scripts/nightlight.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
       TEMP=4000
+      FLAG="''${XDG_CACHE_HOME:-$HOME/.cache}/nightlight-manual"
+      start() { pgrep -x hyprsunset >/dev/null || ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" >/dev/null 2>&1 & }
+      stop()  { pkill -x hyprsunset 2>/dev/null || true; }
       case "''${1:-toggle}" in
+          login)
+              rm -f "$FLAG"
+              exec "$0" auto ;;
           auto)
-              h=$(date +%H); [ "$h" -ge 20 ] || [ "$h" -lt 7 ] || exit 0
-              pgrep -x hyprsunset >/dev/null || ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" >/dev/null 2>&1 & ;;
+              [ -e "$FLAG" ] && exit 0
+              h=$(date +%H)
+              if [ "$h" -ge 20 ] || [ "$h" -lt 7 ]; then start; else stop; fi ;;
           on)
-              pgrep -x hyprsunset >/dev/null || ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" >/dev/null 2>&1 & ;;
+              touch "$FLAG"; start ;;
           off)
-              pkill -x hyprsunset 2>/dev/null || true ;;
+              touch "$FLAG"; stop ;;
           *)
+              touch "$FLAG"
               if pgrep -x hyprsunset >/dev/null; then
-                  pkill -x hyprsunset
+                  stop
                   notify-send "Night light" "off" 2>/dev/null || true
               else
-                  ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" >/dev/null 2>&1 &
+                  start
                   notify-send "Night light" "on (''${TEMP}K)" 2>/dev/null || true
               fi ;;
       esac
     '';
+  };
+
+  # Re-checks the schedule so a filter enabled under a wrong clock (RTC
+  # skew before NTP sync) turns itself off once time is corrected.
+  systemd.user.services.nightlight-auto = {
+    Unit.Description = "Apply night light schedule";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.config/hypr/scripts/nightlight.sh auto";
+    };
+  };
+
+  systemd.user.timers.nightlight-auto = {
+    Unit.Description = "Periodic night light schedule check";
+    Timer = {
+      OnBootSec = "5min";
+      OnUnitActiveSec = "15min";
+      Persistent = true;
+    };
+    Install.WantedBy = [ "timers.target" ];
   };
 
   # ─── Screen recording (SUPER+SHIFT+Print) ───────────────────────────
