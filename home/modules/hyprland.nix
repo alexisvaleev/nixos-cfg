@@ -404,10 +404,7 @@ in
               nohup "$HOME/.local/bin/TgWsProxy"  >/dev/null 2>&1 &
       fi
 
-      # Night light switches itself on in the evening (20:00–07:00).
-      # `login` clears the manual-override flag left from a previous
-      # session, then applies the schedule.
-      ~/.config/hypr/scripts/nightlight.sh login &
+
 
       # hypridle needs the logind session to be registered, which happens
       # slightly after Hyprland is fully up.  Wait a bit, start it, then
