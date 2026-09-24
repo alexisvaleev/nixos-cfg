@@ -31,8 +31,6 @@ let
     cpu        = nf "f2db";  # nf-fa-microchip
     mem        = nf "f538";  # nf-fa-memory
     temp       = nf "f2c9";  # nf-fa-thermometer_half
-    moon       = nf "f186";  # nf-fa-moon
-    sun        = nf "f185";  # nf-fa-sun
   };
 in
 {
@@ -50,7 +48,7 @@ in
 
       modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
       modules-center = [ "custom/clock" ];
-      modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "custom/caffeine" "custom/nightlight" "tray" "custom/control" "custom/power" ];
+      modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "network" "bluetooth" "battery" "hyprland/language" "tray" "custom/control" "custom/power" ];
 
       "custom/logo" = {
         format = "${ic.logo}";
@@ -197,22 +195,6 @@ in
         max-length = 30;
       };
 
-      "custom/caffeine" = {
-        exec = "~/.config/hypr/scripts/caffeine.sh";
-        "return-type" = "json";
-        interval = 5;
-        on-click = "~/.config/hypr/scripts/caffeine.sh toggle";
-        tooltip = true;
-      };
-
-      "custom/nightlight" = {
-        exec = "~/.config/hypr/scripts/nightlight.sh status";
-        "return-type" = "json";
-        interval = 5;
-        on-click = "~/.config/hypr/scripts/nightlight.sh";
-        tooltip = true;
-      };
-
       "tray" = {
         spacing = 8;
         icon-size = 16;
@@ -262,8 +244,7 @@ in
       #custom-logo, #custom-appname, #hyprland-workspaces, #hyprland-language,
       #pulseaudio, #network, #bluetooth, #battery, #tray, #custom-clock,
       #custom-control, #custom-power,
-      #mpris, #custom-sysstats, #custom-weather, #custom-caffeine,
-      #custom-nightlight {
+      #mpris, #custom-sysstats, #custom-weather {
           padding: 0 10px;
           margin: 0;
           background-color: transparent;
@@ -273,8 +254,7 @@ in
 
       #custom-logo, #pulseaudio, #network, #bluetooth, #battery,
       #custom-control, #custom-power, #hyprland-language,
-      #mpris, #custom-sysstats, #custom-weather, #custom-caffeine,
-      #custom-nightlight {
+      #mpris, #custom-sysstats, #custom-weather {
           font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
       }
 
@@ -347,10 +327,7 @@ in
       #mpris        { color: @purple; }
       #custom-sysstats  { color: @blue; }
       #custom-weather   { color: @blue; }
-      #custom-caffeine  { color: @subtext; }
-      #custom-caffeine.on { color: @green; }
-      #custom-nightlight    { color: @subtext; }
-      #custom-nightlight.on { color: @yellow; }
+
 
       /* Player drawer buttons — compact, purple accent. */
       #custom-player-toggle, #custom-player-prev, #custom-player-play,

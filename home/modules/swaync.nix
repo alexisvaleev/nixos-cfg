@@ -12,6 +12,8 @@ let
     audio     = nf "f025";  # nf-fa-headphones (audio devices)
     power     = nf "f011";  # nf-fa-power_off
     gear      = nf "f013";  # nf-fa-gear
+    moon      = nf "f186";  # nf-fa-moon
+    coffee    = nf "f0f4";  # nf-fa-coffee
   };
 
   cfg = {
@@ -72,7 +74,7 @@ let
         text = "Do Not Disturb";
       };
       "buttons-grid" = {
-        buttons-per-row = 3;
+        buttons-per-row = 4;
         actions = [
           {
             label = "${ic.wifi}";
@@ -80,6 +82,7 @@ let
             active = true;
             command = "$HOME/.config/swaync/wifi-toggle.sh";
             update-command = "$HOME/.config/swaync/wifi-state.sh";
+            tooltip = "Wi-Fi";
           }
           {
             label = "${ic.bluetooth}";
@@ -87,6 +90,23 @@ let
             active = false;
             command = "$HOME/.config/swaync/bt-toggle.sh";
             update-command = "$HOME/.config/swaync/bt-state.sh";
+            tooltip = "Bluetooth";
+          }
+          {
+            label = "${ic.moon}";
+            type = "toggle";
+            active = false;
+            command = "$HOME/.config/swaync/nightlight-toggle.sh";
+            update-command = "pgrep -x hyprsunset >/dev/null && echo true || echo false";
+            tooltip = "Night light";
+          }
+          {
+            label = "${ic.coffee}";
+            type = "toggle";
+            active = false;
+            command = "$HOME/.config/swaync/caffeine-toggle.sh";
+            update-command = "pgrep -f why=caffeine >/dev/null && echo true || echo false";
+            tooltip = "Caffeine";
           }
           {
             label = "${ic.audio}";
@@ -324,6 +344,32 @@ in
       #!/usr/bin/env bash
       state=$(bluetoothctl show 2>/dev/null | grep Powered | awk '{print $2}')
       [ "$state" = "yes" ] && echo true || echo false
+    '';
+  };
+
+  # Toggle wrappers — SwayNC passes the desired state in
+  # SWAYNC_TOGGLE_STATE; the hypr scripts own the actual on/off logic.
+  xdg.configFile."swaync/nightlight-toggle.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      if [ "$SWAYNC_TOGGLE_STATE" = "true" ]; then
+        "$HOME/.config/hypr/scripts/nightlight.sh" on
+      else
+        "$HOME/.config/hypr/scripts/nightlight.sh" off
+      fi
+    '';
+  };
+
+  xdg.configFile."swaync/caffeine-toggle.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      if [ "$SWAYNC_TOGGLE_STATE" = "true" ]; then
+        "$HOME/.config/hypr/scripts/caffeine.sh" on
+      else
+        "$HOME/.config/hypr/scripts/caffeine.sh" off
+      fi
     '';
   };
 }

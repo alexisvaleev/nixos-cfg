@@ -104,23 +104,27 @@
     '';
   };
 
-  # ─── Caffeine / idle inhibit (waybar toggle) ────────────────────────
-  # `status` prints JSON for the waybar module; `toggle` flips a
-  # systemd-inhibit idle lock that hypridle respects.
+  # ─── Caffeine / idle inhibit (control center toggle) ────────────────
+  # `on`/`off` set a systemd-inhibit idle lock that hypridle respects;
+  # `toggle` flips it. `status` prints waybar-style JSON (debug).
   xdg.configFile."hypr/scripts/caffeine.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
+      on()  { pgrep -f 'why=caffeine' >/dev/null || \
+              ${pkgs.systemd}/bin/systemd-inhibit --what=idle:shutdown:sleep \
+                  --why=caffeine --who=caffeine --mode=block \
+                  sleep infinity >/dev/null 2>&1 & disown; }
+      off() { pkill -f 'why=caffeine' 2>/dev/null || true; }
       case "''${1:-status}" in
+          on)  on ;;
+          off) off ;;
           toggle)
               if pgrep -f 'why=caffeine' >/dev/null; then
-                  pkill -f 'why=caffeine'
+                  off
                   notify-send "Caffeine" "idle lock enabled" 2>/dev/null || true
               else
-                  ${pkgs.systemd}/bin/systemd-inhibit --what=idle:shutdown:sleep \
-                      --why=caffeine --who=caffeine --mode=block \
-                      sleep infinity >/dev/null 2>&1 &
-                  disown
+                  on
                   notify-send "Caffeine" "screen stays on" 2>/dev/null || true
               fi ;;
           *)
