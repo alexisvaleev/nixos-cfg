@@ -130,7 +130,7 @@ let
           {
             label = "${ic.gear}";
             type = "normal";
-            command = "hyprctl reload";
+            command = "sh -c 'hyprctl reload && notify-send Hyprland reloaded'";
             tooltip = "Reload Hyprland";
           }
           {
