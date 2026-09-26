@@ -32,6 +32,14 @@ in
     efi.efiSysMountPoint = "/boot";
   };
 
+  # Boot splash between the loader menu and the session.
+  # Theme names: ls /nix/store/*adi1090x-plymouth-themes*/share/plymouth/themes/
+  boot.plymouth = {
+    enable = true;
+    theme = "dna";
+    themePackages = [ pkgs.adi1090x-plymouth-themes ];
+  };
+
   # ─── Networking ─────────────────────────────────────────────────────
   networking.networkmanager.enable = true;
 
