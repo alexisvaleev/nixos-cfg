@@ -40,6 +40,13 @@ in
     themePackages = [ pkgs.adi1090x-plymouth-themes ];
   };
 
+  # External-monitor brightness via DDC/CI: the ddcci driver registers
+  # each DDC-capable display as a /sys/class/backlight/ddcci* device, so
+  # swaync's backlight slider and brightnessctl work on any monitor.
+  boot.kernelModules = [ "i2c-dev" "ddcci" "ddcci_backlight" ];
+  boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+  hardware.i2c.enable = true;
+
   # ─── Networking ─────────────────────────────────────────────────────
   networking.networkmanager.enable = true;
 
@@ -64,7 +71,7 @@ in
   # ─── User ───────────────────────────────────────────────────────────
   users.users.blessed = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" ];
     shell = pkgs.zsh;
     hashedPassword = "$6$HvbFHwfqX5AmhLzQ$ZvH0EP4WPM9nkzxzmdrq7JCOyY1yphCsqlQBrwjEZnjCg4GGWArEJ4AIw8DMTH9T1/ePkEA8NboGC1x2t8sk9/";
   };

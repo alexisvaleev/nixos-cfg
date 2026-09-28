@@ -147,7 +147,8 @@ let
       };
       backlight = {
         label = "${ic.sun}";
-        device = "intel_backlight";
+        # No fixed device — pick the first available so the same config
+        # works on laptop panels, ddcci (DDC/CI) external monitors, etc.
       };
       mpris = {
         autohide = true;
@@ -329,7 +330,14 @@ in
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      [ "$(nmcli radio wifi)" = "enabled" ] && echo true || echo false
+      # `nmcli radio wifi` says "enabled" even with no wireless adapter
+      # at all — report on only when real wifi hardware exists too.
+      if nmcli -t -f TYPE device status | grep -qx wifi \
+          && [ "$(nmcli radio wifi)" = "enabled" ]; then
+        echo true
+      else
+        echo false
+      fi
     '';
   };
 
