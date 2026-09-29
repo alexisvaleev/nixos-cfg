@@ -238,4 +238,18 @@
       fi
     '';
   };
+
+  # ─── codebase-memory-mcp daemon (warm index + file watcher) ─────────
+  # Keeps the per-project code graph warm so MCP servers, CLI calls and
+  # prompt hooks skip the ~2s binary startup. Binary itself lives in
+  # ~/.local/bin (portable release; not nix-managed).
+  systemd.user.services.cbm-daemon = {
+    Unit.Description = "codebase-memory-mcp daemon (warm index + file watcher)";
+    Service = {
+      ExecStart = "%h/.local/bin/codebase-memory-mcp --cbm-daemon-internal --cbm-daemon-permanent";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
 }
