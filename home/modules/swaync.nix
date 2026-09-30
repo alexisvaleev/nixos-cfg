@@ -103,7 +103,7 @@ let
             label = "${ic.moon}";
             type = "toggle";
             active = false;
-            command = "$HOME/.config/swaync/nightlight-toggle.sh";
+            command = "$HOME/.config/hypr/scripts/nightlight.sh";
             update-command = "pgrep -x hyprsunset >/dev/null && echo true || echo false";
             tooltip = "Night light";
           }
@@ -111,7 +111,7 @@ let
             label = "${ic.coffee}";
             type = "toggle";
             active = false;
-            command = "$HOME/.config/swaync/caffeine-toggle.sh";
+            command = "$HOME/.config/hypr/scripts/caffeine.sh toggle";
             update-command = "pgrep -f why=caffeine >/dev/null && echo true || echo false";
             tooltip = "Caffeine";
           }
@@ -362,29 +362,4 @@ in
     '';
   };
 
-  # Toggle wrappers — SwayNC passes the desired state in
-  # SWAYNC_TOGGLE_STATE; the hypr scripts own the actual on/off logic.
-  xdg.configFile."swaync/nightlight-toggle.sh" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      if [ "$SWAYNC_TOGGLE_STATE" = "true" ]; then
-        "$HOME/.config/hypr/scripts/nightlight.sh" on
-      else
-        "$HOME/.config/hypr/scripts/nightlight.sh" off
-      fi
-    '';
-  };
-
-  xdg.configFile."swaync/caffeine-toggle.sh" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      if [ "$SWAYNC_TOGGLE_STATE" = "true" ]; then
-        "$HOME/.config/hypr/scripts/caffeine.sh" on
-      else
-        "$HOME/.config/hypr/scripts/caffeine.sh" off
-      fi
-    '';
-  };
 }

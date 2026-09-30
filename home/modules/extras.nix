@@ -61,7 +61,9 @@
     text = ''
       #!/usr/bin/env bash
       TEMP=4000
-      start() { pgrep -x hyprsunset >/dev/null || ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" >/dev/null 2>&1 & }
+      # setsid + full fd detach: a plain `&` leaves hyprsunset holding the
+      # caller's pipes open, which makes SwayNC's click handler hang.
+      start() { pgrep -x hyprsunset >/dev/null || setsid ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" </dev/null >/dev/null 2>&1 & }
       stop()  { pkill -x hyprsunset 2>/dev/null || true; }
       case "''${1:-toggle}" in
           status)
@@ -111,10 +113,12 @@
     executable = true;
     text = ''
       #!/usr/bin/env bash
+      # setsid + full fd detach, same reason as nightlight: an inherited
+      # pipe held open by the daemon can hang SwayNC's click handler.
       on()  { pgrep -f 'why=caffeine' >/dev/null || \
-              ${pkgs.systemd}/bin/systemd-inhibit --what=idle:shutdown:sleep \
+              setsid ${pkgs.systemd}/bin/systemd-inhibit --what=idle:shutdown:sleep \
                   --why=caffeine --who=caffeine --mode=block \
-                  sleep infinity >/dev/null 2>&1 & disown; }
+                  sleep infinity </dev/null >/dev/null 2>&1 & }
       off() { pkill -f 'why=caffeine' 2>/dev/null || true; }
       case "''${1:-status}" in
           on)  on ;;
