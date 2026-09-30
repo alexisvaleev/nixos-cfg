@@ -104,7 +104,7 @@ let
             type = "toggle";
             active = false;
             command = "$HOME/.config/hypr/scripts/nightlight.sh";
-            update-command = "pgrep -x hyprsunset >/dev/null && echo true || echo false";
+            update-command = "hyprctl getoption decoration:screen_shader | grep -q nightlight && echo true || echo false";
             tooltip = "Night light";
           }
           {

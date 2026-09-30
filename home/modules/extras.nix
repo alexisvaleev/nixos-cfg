@@ -3,7 +3,8 @@
 { config, pkgs, ... }:
 {
   home.packages = with pkgs; [
-    hyprsunset     # night light daemon
+    # (no hyprsunset — night light is a Hyprland screen_shader; the
+    # KMS-CTM path hyprsunset needs is unavailable on legacy-iface DRM)
     wf-recorder    # screen recording
     pwvucontrol    # per-app volume mixer
     playerctl      # mpris control for waybar clicks
@@ -54,33 +55,53 @@
     '';
   };
 
-  # ─── Night light toggle (SUPER+SHIFT+N or the waybar button) ────────
-  # Purely manual — no schedule. `status` prints the waybar JSON state.
+  # ─── Night light toggle (SUPER+SHIFT+N or the swaync button) ────────
+  # Implemented as a Hyprland screen_shader — a pure render-side effect
+  # that works on any DRM backend. hyprsunset is NOT used: it needs an
+  # atomic KMS CTM, and aquamarine falls back to the legacy iface on
+  # nouveau+GSP ("No support for gamma on the legacy iface").
+  xdg.configFile."hypr/shaders/nightlight.glsl" = {
+    text = ''
+      #version 300 es
+      precision highp float;
+      in vec2 v_texcoord;
+      uniform sampler2D tex;
+      layout(location = 0) out vec4 fragColor;
+
+      // Warm tint, roughly ~4000K.
+      void main() {
+          vec4 c = texture(tex, v_texcoord);
+          c.g *= 0.75;
+          c.b *= 0.45;
+          fragColor = c;
+      }
+    '';
+  };
+
   xdg.configFile."hypr/scripts/nightlight.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      TEMP=4000
-      # setsid + full fd detach: a plain `&` leaves hyprsunset holding the
-      # caller's pipes open, which makes SwayNC's click handler hang.
-      start() { pgrep -x hyprsunset >/dev/null || setsid ${pkgs.hyprsunset}/bin/hyprsunset -t "$TEMP" </dev/null >/dev/null 2>&1 & }
-      stop()  { pkill -x hyprsunset 2>/dev/null || true; }
+      SHADER="$HOME/.config/hypr/shaders/nightlight.glsl"
+      is_on() { hyprctl getoption decoration:screen_shader 2>/dev/null | grep -q "$SHADER"; }
+      on()  { hyprctl eval "hl.config({decoration = { screen_shader = \"$SHADER\" }})" >/dev/null; }
+      off() { hyprctl eval 'hl.config({decoration = { screen_shader = "" }})' >/dev/null; }
       case "''${1:-toggle}" in
           status)
-              if pgrep -x hyprsunset >/dev/null; then
-                  printf '{"text": "\\uf186", "class": "on", "tooltip": "night light on (%sK) — click to turn off"}\n' "$TEMP"
+              if is_on; then
+                  printf '{"text": "\\uf186", "class": "on", "tooltip": "night light on — click to turn off"}\n'
               else
                   printf '{"text": "\\uf185", "class": "off", "tooltip": "night light off — click to turn on"}\n'
               fi ;;
-          on)  start ;;
-          off) stop ;;
+          on)  on ;;
+          off) off ;;
           *)
-              if pgrep -x hyprsunset >/dev/null; then
-                  stop
+              if is_on; then
+                  off
                   notify-send "Night light" "off" 2>/dev/null || true
               else
-                  start
-                  notify-send "Night light" "on (''${TEMP}K)" 2>/dev/null || true
+                  on
+                  notify-send "Night light" "on" 2>/dev/null || true
               fi ;;
       esac
     '';
