@@ -53,7 +53,9 @@
       [Desktop Entry]
       Type=Application
       Name=Vesktop
+      GenericName=Discord
       Comment=Discord client (via v2rayN proxy)
+      Keywords=discord;vencord;vesktop;chat;
       Exec=${config.home.homeDirectory}/.local/bin/vesktop %U
       Icon=${pkgs.vesktop}/share/icons/hicolor/256x256/apps/vesktop.png
       Categories=Network;InstantMessaging;Chat;
