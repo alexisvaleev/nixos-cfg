@@ -29,6 +29,31 @@
     rofi-bluetooth
   ];
 
+  # basedpyright/pyright: the IDE often opens ~ as the workspace root,
+  # which makes the language server enumerate the entire home directory
+  # (>10s, plus constant churn). Cap enumeration to the real code roots
+  # and skip dependency/build dirs everywhere else.
+  home.file."pyrightconfig.json" = {
+    text = builtins.toJSON {
+      include = [ "vscodeFolder" "Apps" "Projects" ".dotfiles" "go" "Muse" ];
+      exclude = [
+        "**/node_modules"
+        "**/.venv"
+        "**/venv"
+        "**/__pycache__"
+        "**/.git"
+        "**/.pytest_cache"
+        "**/.ruff_cache"
+        "**/.mypy_cache"
+        "**/dist"
+        "**/build"
+        "**/.next"
+        "**/target"
+      ];
+      executionEnvironments = [ { root = "vscodeFolder/CallAssistant"; } ];
+    };
+  };
+
   # Vesktop through the local v2rayN proxy (Discord is unreachable
   # without it — same proxy env as the stock-Discord wrapper).
   home.file.".local/bin/vesktop" = {
