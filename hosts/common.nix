@@ -54,6 +54,34 @@ in
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
 
+  # nix-daemon runs as root and never sees the session proxy env, so its
+  # substituter/fetch traffic goes direct — and direct egress to
+  # cache.nixos.org (Fastly) is unreachable from this ISP. Route it
+  # through the local v2rayN instance instead; without this every fetch
+  # stalls on connect timeouts and rebuilds take forever.
+  # If v2rayN is not running, fetches fail either way — no regression.
+  systemd.services.nix-daemon.environment = {
+    http_proxy  = "http://127.0.0.1:10809";
+    https_proxy = "http://127.0.0.1:10809";
+    all_proxy   = "http://127.0.0.1:10809";
+    no_proxy    = "localhost,127.0.0.1,::1";
+  };
+
+  # Same for the client side: `sudo nixos-rebuild` drops the session
+  # env, so libgit2 fetches (flake inputs, `nix flake update`) would go
+  # direct and stall. Keep proxy vars through sudo.
+  security.sudo.extraConfig = ''
+    Defaults env_keep += "http_proxy https_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY NO_PROXY"
+  '';
+
+  # Weekly garbage collection — keeps the store bounded so old
+  # generations and dead paths don't pile up.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+
   services.xserver.enable = true;
   # Generic driver works on Intel/AMD/VMs. For NVIDIA override in the host:
   #   services.xserver.videoDrivers = [ "nvidia" ];
