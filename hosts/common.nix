@@ -82,6 +82,19 @@ in
     options = "--delete-older-than 30d";
   };
 
+  # The installer-generated /etc/nixos/configuration.nix is a dead
+  # template — a bare `nixos-rebuild switch` would silently build that
+  # near-empty system and wipe the desktop setup. Replace it with a stub
+  # that fails loudly and points at the real flake.
+  environment.etc."nixos/configuration.nix".text = ''
+    { ... }: {
+      assertions = [{
+        assertion = false;
+        message = "This system is managed by the flake at ~/.dotfiles — use: nixos-rebuild --flake ~/.dotfiles#<host>";
+      }];
+    }
+  '';
+
   services.xserver.enable = true;
   # Generic driver works on Intel/AMD/VMs. For NVIDIA override in the host:
   #   services.xserver.videoDrivers = [ "nvidia" ];
