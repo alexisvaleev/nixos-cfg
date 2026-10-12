@@ -52,7 +52,6 @@ in
           choice=$(find "$WALL_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | while IFS= read -r f; do
               printf '%s\0icon\x1f%s\n' "$(basename "$f")" "$f"
           done | rofi -dmenu -show-icons -i -p "Wallpaper" || true)
-          choice="''${choice%%$'\0'*}"
           [ -n "$choice" ] || exit 0
           file=$(find "$WALL_DIR" -type f -name "$choice" 2>/dev/null | head -n1 || true)
           [ -n "$file" ] || exit 0
