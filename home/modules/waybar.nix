@@ -56,6 +56,7 @@ in
         "return-type" = "json";
         interval = 1800;
         max-length = 30;
+        markup = true;
       };
 
       "hyprland/workspaces" = {
@@ -96,6 +97,7 @@ in
         on-scroll-up = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
         on-scroll-down = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
         tooltip = true;
+        markup = true;
       };
 
       "tray" = {
@@ -105,9 +107,9 @@ in
       };
 
       "battery" = {
-        format = "{icon} {capacity}%";
-        format-charging = "${ic.batCharge} {capacity}%";
-        format-full = "{icon} {capacity}%";
+        format = "<span font-family='Iosevka Nerd Font Propo'>{icon}</span> {capacity}%";
+        format-charging = "<span font-family='Iosevka Nerd Font Propo'>${ic.batCharge}</span> {capacity}%";
+        format-full = "<span font-family='Iosevka Nerd Font Propo'>{icon}</span> {capacity}%";
         format-icons = ic.bat;
         states = {
           warning = 30;
@@ -119,7 +121,8 @@ in
       # NixOS glyph — the single accent of the right capsule.
       # Opens the control center.
       "custom/cc" = {
-        format = "${ic.logo}";
+        format = "<span font-family='Iosevka Nerd Font Propo'>${ic.logo}</span>";
+        markup = true;
         on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
         tooltip = false;
       };
@@ -282,8 +285,9 @@ in
           [ -n "$bat" ] && tip="headphones: $bat"
       fi
 
-      printf '{"text":"%s %s%%","tooltip":"%s","class":"%s"}\n' \
-          "$icon" "$pct" "$tip" "$class"
+      text="<span font-family='Iosevka Nerd Font Propo'>$icon</span> $pct%"
+      ${pkgs.jq}/bin/jq -nc --arg t "$text" --arg tip "$tip" --arg c "$class" \
+          '{text:$t, tooltip:$tip, class:$c}'
     '';
   };
 
