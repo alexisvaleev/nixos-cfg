@@ -22,6 +22,11 @@ let
         $out/share/sddm/themes/sddm-astronaut-theme/Backgrounds/nixos.jpg
     '';
   };
+
+  # Cisco Packet Tracer 8.2.2 — vendored derivation (nixpkgs dropped it).
+  # Needs the .deb added to the store once per machine:
+  #   nix-store --add-fixed sha256 PacketTracer822_amd64_signed_en-US_*.deb
+  packetTracer8 = pkgs.callPackage ../pkgs/ciscoPacketTracer8/package.nix { };
 in
 {
   # ─── Boot ───────────────────────────────────────────────────────────
@@ -53,6 +58,9 @@ in
   # ─── Nix / Flakes ───────────────────────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
+  # PT8 bundles QtWebEngine 5.15 (known CVEs) — accepted consciously,
+  # it is the version our course distributes.
+  nixpkgs.config.permittedInsecurePackages = [ "ciscoPacketTracer8-8.2.2" ];
 
   # nix-daemon runs as root and never sees the session proxy env, so its
   # substituter/fetch traffic goes direct — and direct egress to
@@ -101,6 +109,15 @@ in
   #   hardware.nvidia.modesetting.enable = true;
   services.xserver.videoDrivers = lib.mkDefault [ "modesetting" ];
   hardware.graphics.enable = true;
+
+  # ─── Steam (also turns on 32-bit graphics libs for Proton/native games) ─
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
+  };
+  programs.gamemode.enable = true;
+
   hardware.enableAllFirmware = true;
   hardware.cpu.intel.updateMicrocode = true;
   hardware.cpu.amd.updateMicrocode = true;
@@ -226,6 +243,10 @@ in
   # ─── Polkit (auth agent for GUI privilege escalation) ───────────────
   security.polkit.enable = true;
   security.pam.services.hyprlock = {};
+
+  # ─── Secret Service (API-ключи coucou и др. живут в keyring) ─────────
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.sddm.enableGnomeKeyring = true;
 
   # ─── Nix-LD (run prebuilt binaries like TgWsProxy / PyInstaller apps) ─
   programs.nix-ld.enable = true;
@@ -358,6 +379,8 @@ in
     kdePackages.dolphin
     # dev (editors managed via home-manager)
     opencode
+    # Cisco Packet Tracer 8.2.2 — see packetTracer8 let-binding above
+    packetTracer8
     # SDDM custom theme (provides sddm-astronaut-theme with our colors + wallpaper)
     customSddmTheme
   ];

@@ -1,7 +1,9 @@
 # hyprpaper — wallpaper daemon (raw config; started via hyprland.lua).
-# The wallpaper image is installed into a stable location below.
-# wallpaper.sh picks a random wallpaper from ~/Pictures/wallpapers, applies it
-# via hyprpaper, then regenerates the theme with matugen and reloads consumers.
+# The wallpaper image lives behind a stable symlink at
+# ~/.local/share/backgrounds/wallpaper.jpg: whatever was last picked stays
+# picked — across logins, reboots and every machine this config runs on.
+# wallpaper.sh --pick (SUPER+CTRL+W) retargets the symlink, applies it via
+# hyprpaper, regenerates the matugen theme and reloads consumers.
 { config, pkgs, ... }:
 let
   home = config.home.homeDirectory;
@@ -13,35 +15,13 @@ in
     ipc=on
     splash=false
     preload=${wall}
-    wallpaper=eDP-1,${wall}
+    wallpaper=,${wall}
   '';
 
   # Stable wallpaper location, used by hyprpaper + hyprlock. NOT managed
   # by HM: wallpaper.sh --init creates the symlink and later picks point
   # it at the chosen file — a managed link collides and aborts the whole
   # activation ("Existing file would be clobbered").
-
-  # Auto-rotate: every 30 min pick a random image from
-  # ~/Pictures/wallpapers, apply it and regenerate the matugen palette.
-  # With one file it just re-applies the same wallpaper — drop more
-  # images into the dir to make rotation meaningful.
-  systemd.user.services.wallpaper-rotate = {
-    Unit.Description = "Rotate wallpaper + matugen theme";
-    Service = {
-      Type = "oneshot";
-      ExecStart = "%h/.config/hypr/scripts/wallpaper.sh";
-    };
-  };
-
-  systemd.user.timers.wallpaper-rotate = {
-    Unit.Description = "Periodic wallpaper rotation";
-    Timer = {
-      OnBootSec = "10min";
-      OnUnitActiveSec = "30min";
-      Persistent = true;
-    };
-    Install.WantedBy = [ "timers.target" ];
-  };
 
   xdg.configFile."hypr/scripts/wallpaper.sh" = {
     executable = true;
@@ -54,8 +34,20 @@ in
       mkdir -p "$THEME_DIR" "$WALL_DIR"
 
       if [ "''${1:-}" = "--init" ]; then
-          file="$DEFAULT_WALL"
+          # Login path: re-apply the persisted pick. The symlink survives
+          # reboots, so whatever was last chosen is what comes back.
+          file=$(readlink -f "$DEFAULT_WALL" 2>/dev/null || true)
+          if [ ! -f "$file" ]; then
+              # Nothing picked yet (or the target is gone): seed the link with
+              # the bundled default, else any image we can find.
+              file="$WALL_DIR/default.jpg"
+              [ -f "$file" ] || file=$(find "$WALL_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1 || true)
+          fi
       elif [ "''${1:-}" = "--pick" ]; then
+          # rofi is single-instance: a headless process left by an earlier
+          # open holds the lock and every later launch exits silently before
+          # a window can map. Pickers are modal anyway, so kill the stale one.
+          pkill -x rofi 2>/dev/null || true
           # rofi -dmenu with icon protocol: "label\0icon\x1f/path"
           choice=$(find "$WALL_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | while IFS= read -r f; do
               printf '%s\0icon\x1f%s\n' "$(basename "$f")" "$f"
@@ -65,14 +57,15 @@ in
           file=$(find "$WALL_DIR" -type f -name "$choice" 2>/dev/null | head -n1 || true)
           [ -n "$file" ] || exit 0
       else
+          # Manual random (SUPER+ALT+W): still a deliberate pick — it persists.
           file=$(find "$WALL_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | shuf -n 1 || true)
-          [ -n "$file" ] || file="$DEFAULT_WALL"
+          [ -n "$file" ] || file="$WALL_DIR/default.jpg"
       fi
 
       [ -f "$file" ] || exit 0
 
-      # Keep the stable path in sync so hyprlock/hyprpaper.conf still work.
-      ln -sf "$file" "$DEFAULT_WALL"
+      # Point the stable path at the pick so hyprlock/hyprpaper.conf follow.
+      [ "$file" = "$DEFAULT_WALL" ] || ln -sf "$file" "$DEFAULT_WALL"
 
       # Apply wallpaper via hyprpaper (it's started by autostart.sh).
       hyprctl hyprpaper preload "$file" >/dev/null 2>&1 || true
