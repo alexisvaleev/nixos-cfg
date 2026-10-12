@@ -166,11 +166,6 @@ in
           min-height: 30px;
       }
 
-      #custom-weather, #custom-volume, #language,
-      #battery, #custom-cc {
-          font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
-      }
-
       #custom-weather { padding-right: 8px; }
 
       #workspaces button {
