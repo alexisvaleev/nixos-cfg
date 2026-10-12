@@ -183,18 +183,37 @@
     '';
   };
 
-  # ─── Weather (waybar module, wttr.in) ───────────────────────────────
+  # ─── Weather (waybar module, wttr.in j1) ────────────────────────────
+  # Bar: emoji + current temp. Tooltip: now / today (min…max + condition
+  # at midday) / rain chance / wind — all in Russian.
   xdg.configFile."hypr/scripts/weather.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      # %t = "+14°C", %c = weather emoji, %C = text condition (tooltip).
-      out=$(curl -s --max-time 5 'wttr.in/?format=%t+%c|%C&lang=ru' 2>/dev/null)
-      if [ -n "$out" ]; then
-          printf '{"text":"%s","tooltip":"%s"}\n' "''${out%%|*}" "''${out##*|}"
-      else
-          echo '{"text":""}'
-      fi
+      json=$(curl -s --max-time 8 'wttr.in/?format=j1&lang=ru' 2>/dev/null)
+      [ -n "$json" ] || { echo '{"text":""}'; exit 0; }
+      printf '%s' "$json" | ${pkgs.jq}/bin/jq -r '
+        def emoji($c):
+          if $c == "113" then "☀️"
+          elif $c == "116" then "⛅"
+          elif ($c | test("^(119|122)$")) then "☁️"
+          elif ($c | test("^(143|248|260)$")) then "🌫️"
+          elif ($c | test("^(200|386|389|392)$")) then "⛈️"
+          elif ($c | test("^(179|227|230|320|323|326|329|332|335|338|350|368|371|374|377|395)$")) then "🌨️"
+          elif ($c | test("^(176|353|362)$")) then "🌦️"
+          elif ($c | test("^(185|263|266|281|284|293|296|299|302|305|307|308|311|314|315|317|318|356|359|365|399)$")) then "🌧️"
+          else "🌡️" end;
+        (.current_condition[0]) as $c |
+        (.weather[0]) as $w |
+        ($w.hourly[4]) as $mid |
+        ($mid.lang_ru[0].value // $mid.weatherDesc[0].value // "?") as $wdesc |
+        ($c.lang_ru[0].value // $c.weatherDesc[0].value // "?") as $cdesc |
+        ([$w.hourly[].chanceofrain | tonumber] | max) as $rain |
+        ($mid.windspeedKmph // $c.windspeedKmph) as $wind |
+        {
+          text: "\(emoji($c.weatherCode)) \($c.temp_C)°",
+          tooltip: "Сейчас: \($c.temp_C)°, \($cdesc)\nСегодня: \($w.mintempC)…\($w.maxtempC)°, \($wdesc)\nДождь: \($rain)% · Ветер: \($wind) км/ч"
+        } | @json' 2>/dev/null || echo '{"text":""}'
     '';
   };
 
