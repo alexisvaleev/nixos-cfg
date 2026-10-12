@@ -239,6 +239,20 @@ in
   # shared USB controller. Keep this specific device fully awake.
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="a725", TEST=="power/control", ATTR{power/control}="on"
+
+    # ddcci: attach the DDC/CI backlight driver to GPU i2c adapters so
+    # external monitors appear in /sys/class/backlight (laptop panels
+    # already have a native backlight device). Adapter names: nouveau
+    # exposes "DP-N" / "NVIDIA * i2c adapter", i915 uses "*gmbus*",
+    # amdgpu uses "*aux*".
+    ACTION=="add", SUBSYSTEM=="i2c", ATTR{name}=="NVIDIA*", RUN+="${pkgs.bash}/bin/sh -c 'echo ddcci 0x37 > /sys/bus/i2c/devices/%k/new_device 2>/dev/null || true'"
+    ACTION=="add", SUBSYSTEM=="i2c", ATTR{name}=="DP-*", RUN+="${pkgs.bash}/bin/sh -c 'echo ddcci 0x37 > /sys/bus/i2c/devices/%k/new_device 2>/dev/null || true'"
+    ACTION=="add", SUBSYSTEM=="i2c", ATTR{name}=="*gmbus*", RUN+="${pkgs.bash}/bin/sh -c 'echo ddcci 0x37 > /sys/bus/i2c/devices/%k/new_device 2>/dev/null || true'"
+    ACTION=="add", SUBSYSTEM=="i2c", ATTR{name}=="*aux*", RUN+="${pkgs.bash}/bin/sh -c 'echo ddcci 0x37 > /sys/bus/i2c/devices/%k/new_device 2>/dev/null || true'"
+
+    # Let the video group write brightness so the SwayNC slider works
+    # for an unprivileged session (blessed is in "video").
+    ACTION=="add", SUBSYSTEM=="backlight", RUN+="${pkgs.bash}/bin/sh -c 'chgrp video /sys/class/backlight/%k/brightness && chmod g+w /sys/class/backlight/%k/brightness'"
   '';
 
   # ─── Memory pressure / freeze resilience ────────────────────────────
