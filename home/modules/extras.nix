@@ -194,15 +194,15 @@
       [ -n "$json" ] || { echo '{"text":""}'; exit 0; }
       printf '%s' "$json" | ${pkgs.jq}/bin/jq -r '
         def glyph($c):
-          if $c == "113" then "\ue30d"
-          elif $c == "116" then "\ue302"
-          elif ($c | test("^(119|122)$")) then "\ue312"
-          elif ($c | test("^(143|248|260)$")) then "\ue313"
-          elif ($c | test("^(200|386|389|392)$")) then "\ue31d"
-          elif ($c | test("^(176|353|362)$")) then "\ue319"
-          elif ($c | test("^(179|227|230|320|323|326|329|332|335|338|350|368|371|374|377|395)$")) then "\ue35a"
-          elif ($c | test("^(185|263|266|281|284|293|296|299|302|305|307|308|311|314|315|317|318|356|359|365|399)$")) then "\ue334"
-          else "\ue33d" end;
+    if $c == "113" then "\uf185"
+    elif $c == "116" then "\uf0c2"
+    elif ($c | test("^(119|122)$")) then "\uf0c2"
+    elif ($c | test("^(143|248|260)$")) then "\uf0c2"
+    elif ($c | test("^(200|386|389|392)$")) then "\uf0e7"
+    elif ($c | test("^(176|353|362)$")) then "\uf0e9"
+    elif ($c | test("^(179|227|230|320|323|326|329|332|335|338|350|368|371|374|377|395)$")) then "\uf2dc"
+    elif ($c | test("^(185|263|266|281|284|293|296|299|302|305|307|308|311|314|315|317|318|356|359|365|399)$")) then "\uf043"
+    else "\uf2c9" end;
         (.current_condition[0]) as $c |
         (.weather[0]) as $w |
         ($w.hourly[4]) as $mid |
