@@ -152,7 +152,6 @@ in
           padding: 0 14px;
           margin-top: 6px;
           margin-bottom: 4px;
-          box-shadow: 0 6px 20px alpha(@bg_dark, 0.35);
       }
       .modules-left  { margin-left: 12px; }
       .modules-right { margin-right: 12px; }
