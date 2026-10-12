@@ -218,8 +218,8 @@ in
 
       #custom-cc {
           color: @purple;
-          font-size: 15px;
-          padding: 0 2px 0 6px;
+          font-size: 14px;
+          padding: 0 6px 0 8px;
       }
 
       #tray { background-color: transparent; }
@@ -284,7 +284,7 @@ in
           [ -n "$bat" ] && tip="headphones: $bat"
       fi
 
-      text="<span font_family='JetBrainsMono Nerd Font'>$icon</span> $pct%"
+      text="<span font_family='JetBrainsMono Nerd Font'>$icon</span>  $pct%"
       ${pkgs.jq}/bin/jq -nc --arg t "$text" --arg tip "$tip" --arg c "$class" \
           '{text:$t, tooltip:$tip, class:$c}'
     '';
