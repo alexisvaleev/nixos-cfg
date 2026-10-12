@@ -107,9 +107,9 @@ in
       };
 
       "battery" = {
-        format = "<span font-family='Iosevka Nerd Font Propo'>{icon}</span> {capacity}%";
-        format-charging = "<span font-family='Iosevka Nerd Font Propo'>${ic.batCharge}</span> {capacity}%";
-        format-full = "<span font-family='Iosevka Nerd Font Propo'>{icon}</span> {capacity}%";
+        format = "<span font_family='Iosevka Nerd Font Propo'>{icon}</span> {capacity}%";
+        format-charging = "<span font_family='Iosevka Nerd Font Propo'>${ic.batCharge}</span> {capacity}%";
+        format-full = "<span font_family='Iosevka Nerd Font Propo'>{icon}</span> {capacity}%";
         format-icons = ic.bat;
         states = {
           warning = 30;
@@ -121,7 +121,7 @@ in
       # NixOS glyph — the single accent of the right capsule.
       # Opens the control center.
       "custom/cc" = {
-        format = "<span font-family='Iosevka Nerd Font Propo'>${ic.logo}</span>";
+        format = "<span font_family='Iosevka Nerd Font Propo'>${ic.logo}</span>";
         markup = true;
         on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
         tooltip = false;
@@ -285,7 +285,7 @@ in
           [ -n "$bat" ] && tip="headphones: $bat"
       fi
 
-      text="<span font-family='Iosevka Nerd Font Propo'>$icon</span> $pct%"
+      text="<span font_family='Iosevka Nerd Font Propo'>$icon</span> $pct%"
       ${pkgs.jq}/bin/jq -nc --arg t "$text" --arg tip "$tip" --arg c "$class" \
           '{text:$t, tooltip:$tip, class:$c}'
     '';
