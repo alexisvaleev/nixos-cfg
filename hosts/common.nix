@@ -127,6 +127,10 @@ in
         open = true;
         nvidiaSettings = false;
       };
+      # Wayland greeter: no X server at login, so modesetting can't race
+      # nvidia for the KMS device (the X-driver claim race killed SDDM).
+      # On non-NVIDIA machines the greeter just uses i915/amdgpu instead.
+      services.displayManager.sddm.wayland.enable = lib.mkForce true;
     };
   };
 
