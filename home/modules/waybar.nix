@@ -40,27 +40,22 @@ in
     settings = [{
       layer = "top";
       position = "top";
-      height = 28;
+      height = 40;
       margin-top = 0;
       margin-left = 0;
       margin-right = 0;
       spacing = 0;
 
-      modules-left = [ "custom/logo" "hyprland/workspaces" "custom/appname" ];
-      modules-center = [ "custom/clock" ];
-      modules-right = [ "custom/weather" "group/player" "custom/sysstats" "pulseaudio" "bluetooth" "battery" "hyprland/language" "tray" "custom/control" "custom/power" ];
+      # Two floating capsules: weather + workspaces left; lang, clock,
+      # volume, tray, battery, control-center icon right. Nothing else.
+      modules-left = [ "custom/weather" "hyprland/workspaces" ];
+      modules-right = [ "hyprland/language" "custom/clock" "custom/volume" "tray" "battery" "custom/cc" ];
 
-      "custom/logo" = {
-        format = "${ic.logo}";
-        on-click = "rofi -show drun";
-        tooltip = false;
-      };
-
-      "custom/appname" = {
-        format = "{}";
-        exec = "$HOME/.config/waybar/appname.sh";
-        interval = 1;
-        tooltip = false;
+      "custom/weather" = {
+        exec = "~/.config/hypr/scripts/weather.sh";
+        "return-type" = "json";
+        interval = 1800;
+        max-length = 30;
       };
 
       "hyprland/workspaces" = {
@@ -82,23 +77,31 @@ in
         on-click = "hyprctl switchxkblayout all next";
       };
 
-      "pulseaudio" = {
-        format = "{icon} {volume}%";
-        format-muted = "${ic.volMute}";
-        format-icons = {
-          default = [ "${ic.volLow}" "${ic.volMid}" "${ic.volHigh}" ];
-        };
-        on-click = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-        scroll-step = 5;
-        tooltip = false;
+      "custom/clock" = {
+        exec = "~/.config/hypr/scripts/clock.sh";
+        "return-type" = "json";
+        interval = 5;
+        on-click = "${pkgs.gsimplecal}/bin/gsimplecal";
+        tooltip = true;
       };
 
-      "bluetooth" = {
-        format = "${ic.btOff}";
-        format-connected = "${ic.btOn} ${ic.headphones} {device_battery_percentage}%";
-        format-off = "${ic.btOff}";
-        on-click = "rofi-bluetooth";
-        tooltip = false;
+      # Volume with headphone detection: speaker glyph normally,
+      # headphones when the default sink is a wired jack port or a
+      # bluetooth device; BT battery shows in the tooltip.
+      "custom/volume" = {
+        exec = "~/.config/waybar/volume.sh";
+        "return-type" = "json";
+        interval = 2;
+        on-click = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        on-scroll-up = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
+        on-scroll-down = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
+        tooltip = true;
+      };
+
+      "tray" = {
+        spacing = 8;
+        icon-size = 16;
+        show-passive-items = true;
       };
 
       "battery" = {
@@ -113,102 +116,11 @@ in
         tooltip = false;
       };
 
-      # Player: artist always visible; hovering slides out ⏮ ⏯ ⏹ ⏭.
-      # Click raises the player's window, middle-click stops, scroll seeks.
-      "group/player" = {
-        orientation = "inherit";
-        drawer = {
-          "transition-duration" = 300;
-          "children-class" = "player-controls";
-          "transition-left-to-right" = false;
-          "click-to-reveal" = false;
-        };
-        modules = [ "custom/player-toggle" "mpris" "custom/player-prev" "custom/player-play" "custom/player-stop" "custom/player-next" ];
-      };
-
-      # Permanent ♪ icon — the popup toggle anchor. The mpris module and
-      # the player-buttons.sh cells render empty when nothing plays, so
-      # without this the whole group vanishes and there's nothing to click.
-      "custom/player-toggle" = {
-        format = ic.music;
-        on-click = "${pkgs.quickshell}/bin/qs -c player ipc call player toggle";
-        tooltip = false;
-      };
-
-      "mpris" = {
-        format = "${ic.music} {artist}";
-        format-paused = "${ic.music} {artist}";
-        max-length = 25;
-        on-click = "${pkgs.quickshell}/bin/qs -c player ipc call player toggle";
-        on-click-middle = "${pkgs.playerctl}/bin/playerctl stop";
-        on-scroll-up = "${pkgs.playerctl}/bin/playerctl position 10+";
-        on-scroll-down = "${pkgs.playerctl}/bin/playerctl position 10-";
-        tooltip-format = "{player}: {artist} - {title} ({position} / {length})";
-      };
-
-      "custom/player-prev" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh prev";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl previous";
-        tooltip = false;
-      };
-      "custom/player-play" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh play";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl play-pause";
-        tooltip = false;
-      };
-      "custom/player-stop" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh stop";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl stop";
-        tooltip = false;
-      };
-      "custom/player-next" = {
-        exec = "~/.config/hypr/scripts/player-buttons.sh next";
-        interval = 1;
-        on-click = "${pkgs.playerctl}/bin/playerctl next";
-        tooltip = false;
-      };
-
-      # Single cell: cpu% mem% temp° (sysstats.sh), click opens btop.
-      "custom/sysstats" = {
-        exec = "~/.config/hypr/scripts/sysstats.sh";
-        interval = 3;
-        on-click = "kitty --class btop-float -e ${pkgs.btop}/bin/btop";
-        tooltip-format = "cpu · ram · temp — btop";
-      };
-
-      "custom/weather" = {
-        exec = "~/.config/hypr/scripts/weather.sh";
-        "return-type" = "json";
-        interval = 1800;
-        max-length = 30;
-      };
-
-      "tray" = {
-        spacing = 8;
-        icon-size = 16;
-        show-passive-items = true;
-      };
-
-      "custom/clock" = {
-        exec = "~/.config/hypr/scripts/clock.sh";
-        "return-type" = "json";
-        interval = 5;
-        on-click = "${pkgs.gsimplecal}/bin/gsimplecal";
-        tooltip = true;
-      };
-
-      "custom/control" = {
-        format = "${ic.control}";
-        on-click = "swaync-client -t";
-        tooltip = false;
-      };
-
-      "custom/power" = {
-        format = "${ic.power}";
-        on-click = "~/.config/rofi/powermenu.sh";
+      # NixOS glyph — the single accent of the right capsule.
+      # Opens the control center.
+      "custom/cc" = {
+        format = "${ic.logo}";
+        on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
         tooltip = false;
       };
     }];
@@ -225,47 +137,56 @@ in
           min-height: 0;
       }
 
+      /* Fully transparent strip — the capsules are the only visible
+         elements; shadow and blur belong to them, not the bar. */
       window#waybar {
-          background-color: alpha(@bg, 0.35);
-          border-radius: 0;
+          background-color: transparent;
       }
 
       window#waybar.hidden { opacity: 0.2; }
 
-      #custom-logo, #custom-appname, #hyprland-workspaces, #hyprland-language,
-      #pulseaudio, #bluetooth, #battery, #tray, #custom-clock,
-      #custom-control, #custom-power,
-      #mpris, #custom-sysstats, #custom-weather {
-          padding: 0 10px;
-          margin: 0;
+      .modules-left, .modules-right {
+          background-color: alpha(@bg, 0.55);
+          border: 1px solid alpha(@purple, 0.18);
+          border-radius: 999px;
+          padding: 0 14px;
+          margin-top: 6px;
+          margin-bottom: 4px;
+          box-shadow: 0 6px 20px alpha(@bg_dark, 0.35);
+      }
+      .modules-left  { margin-left: 12px; }
+      .modules-right { margin-right: 12px; }
+
+      /* All module text is subtext — the capsule stays quiet; purple is
+         reserved for things that carry information. */
+      #custom-weather, #workspaces, #language, #custom-clock, #custom-volume,
+      #tray, #battery, #custom-cc {
+          padding: 0 6px;
           background-color: transparent;
-          color: @text;
-          min-height: 28px;
+          color: @subtext;
+          min-height: 30px;
       }
 
-      #custom-logo, #pulseaudio, #bluetooth, #battery,
-      #custom-control, #custom-power, #hyprland-language,
-      #mpris, #custom-sysstats, #custom-weather {
+      #custom-weather, #custom-volume, #language,
+      #battery, #custom-cc {
           font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
       }
 
-      #workspaces {
-          padding: 0 4px;
-      }
+      #custom-weather { padding-right: 8px; }
 
       #workspaces button {
-          min-width: 22px;
-          min-height: 22px;
-          margin: 3px 2px;
+          min-width: 20px;
+          min-height: 20px;
+          margin: 5px 2px;
           padding: 0;
           border-radius: 999px;
-          color: @text;
-          background-color: alpha(@purple, 0.35);
+          color: @subtext;
+          background-color: transparent;
           font-weight: 600;
       }
 
       #workspaces button:hover {
-          background-color: alpha(@purple, 0.6);
+          background-color: alpha(@purple, 0.3);
           color: @text;
       }
 
@@ -280,111 +201,95 @@ in
           color: @bg;
       }
 
-      #workspaces button.empty,
-      #workspaces button.persistent {
-          color: @subtext;
-      }
-
       #language {
-          color: @mauve;
           font-weight: 600;
           font-size: 11px;
           min-width: 22px;
       }
 
-      #custom-logo {
-          color: @purple;
-          font-size: 16px;
-          padding-left: 18px;
-          padding-right: 6px;
-      }
-
-      #custom-appname {
-          color: @text;
-          font-weight: 500;
-          padding-left: 0;
-      }
-
       #custom-clock {
-          color: #ffffff;
+          color: @text;
           font-weight: 600;
           font-size: 13px;
       }
 
-      #pulseaudio { color: @mauve; }
+      #custom-volume.headphones { color: @mauve; }
+      #custom-volume.muted      { color: @muted; }
 
-      #bluetooth   { color: @blue; }
-      #battery     { color: @green; }
-      #mpris        { color: @purple; }
-      #custom-sysstats  { color: @blue; }
-      #custom-weather   { color: @blue; }
-
-
-      /* Player drawer buttons — compact, purple accent. */
-      #custom-player-toggle, #custom-player-prev, #custom-player-play,
-      #custom-player-stop, #custom-player-next {
-          padding: 0 5px;
-          min-height: 28px;
-          color: @purple;
-          font-size: 13px;
-      }
-      .player-controls {
-          background-color: alpha(@surface2, 0.5);
-          border-radius: 6px;
-      }
-
-      #battery.warning { color: @yellow; }
+      #battery.warning  { color: @yellow; }
       #battery.critical { color: @red; }
       #battery.charging { color: @green; }
-      #custom-control { color: @subtext; font-size: 13px; }
-      #custom-power { color: @red; font-size: 13px; }
+
+      #custom-cc {
+          color: @purple;
+          font-size: 15px;
+          padding: 0 2px 0 6px;
+      }
 
       #tray { background-color: transparent; }
 
-      #custom-power:hover {
-          background-color: @red;
-          color: @bg;
-          border-radius: 4px;
-      }
-
-      #custom-logo:hover,
-      #custom-appname:hover,
-      #pulseaudio:hover,
-      #bluetooth:hover,
-      #battery:hover,
-      #custom-control:hover,
-      #tray:hover,
-      #custom-clock:hover,
-      #hyprland-language:hover,
-      #mpris:hover,
-      #custom-sysstats:hover,
-      #custom-weather:hover {
-          background-color: @surface2;
-          border-radius: 4px;
+      #custom-weather:hover, #custom-clock:hover, #custom-volume:hover,
+      #battery:hover, #custom-cc:hover, #tray:hover,
+      #language:hover {
+          background-color: alpha(@surface2, 0.7);
+          border-radius: 999px;
       }
     '';
   };
 
-  # ─── Active application helper ─────────────────────────────────────
-  xdg.configFile."waybar/appname.sh" = {
+  # ─── Volume module helper ──────────────────────────────────────────
+  # Emits JSON for custom/volume: speaker glyph by level, headphones
+  # glyph for a wired-jack port or any bluetooth sink, mute x-mark,
+  # BT headset battery in the tooltip via upower.
+  xdg.configFile."waybar/volume.sh" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      class=$(hyprctl -j activewindow 2>/dev/null \
-        | ${pkgs.jq}/bin/jq -r '(.class // "") | ascii_downcase' 2>/dev/null)
-      if [ -z "$class" ]; then
-        echo "Desktop"
-        exit 0
+      pactl=${pkgs.pulseaudio}/bin/pactl
+      wpctl=${pkgs.wireplumber}/bin/wpctl
+      upower=${pkgs.upower}/bin/upower
+
+      sink=$($pactl get-default-sink 2>/dev/null)
+      info=$($wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
+      pct=$(printf '%s' "$info" | awk '{printf "%d", $2*100}')
+      [ -z "$pct" ] && pct=0
+
+      icon=""   # nf-fa-volume_high
+      class=""
+      if printf '%s' "$info" | grep -q MUTED; then
+          icon=""   # nf-fa-xmark
+          class="muted"
+      else
+          # wired jack -> active port says headphones; BT -> bluez_* sink
+          port=$($pactl list sinks 2>/dev/null \
+              | awk -v s="$sink" '
+                  $0 ~ "Name: "s {f=1; next}
+                  f && /^[[:space:]]*Name: / {f=0}
+                  f && /Active Port:/ {print $3; exit}')
+          hp=
+          case "$port" in *headphone*|*Headphone*) hp=1 ;; esac
+          case "$sink" in bluez*) hp=1 ;; esac
+          if [ -n "$hp" ]; then
+              icon=""   # nf-fa-headphones
+              class="headphones"
+          else
+              [ "$pct" -lt 34 ] && icon=""   # volume_off
+              [ "$pct" -lt 67 ] && icon=""   # volume_low
+          fi
       fi
-      case "$class" in
-        firefox|firefox-esr|librewolf)   echo "Firefox" ;;
-        *code*|code-oss|vscodium)        echo "Code" ;;
-        telegram*|org.telegram.desktop)  echo "Telegram" ;;
-        discord)                         echo "Discord" ;;
-        dolphin|org.kde.dolphin)         echo "Files" ;;
-        kitty|alacritty|foot|wezterm|gnome-terminal) echo "Terminal" ;;
-        *)                               echo "''${class^}" ;;
-      esac
+
+      tip="volume"
+      if [ "$class" = "headphones" ]; then
+          dev=$($upower -e 2>/dev/null \
+              | grep -iE 'headset|headphone|bluez' | head -1)
+          [ -n "$dev" ] && \
+              bat=$($upower -i "$dev" 2>/dev/null \
+                  | awk '/percentage/{print $2; exit}')
+          [ -n "$bat" ] && tip="headphones: $bat"
+      fi
+
+      printf '{"text":"%s %s%%","tooltip":"%s","class":"%s"}\n' \
+          "$icon" "$pct" "$tip" "$class"
     '';
   };
 
@@ -402,36 +307,30 @@ in
       FILE="$DIR/adjust.css"
       ENV="$DIR/tune.env"
 
-      # defaults mirror style.css
-      ICON_PAD=0; WS_MARGIN=3; WS_WIDTH=22; WS_HP=0; LOGO_LEFT=18; APP_LEFT=0; MOD_PAD=10
+      # defaults mirror style.css (30px modules inside the capsules)
+      ICON_PAD=0; WS_MARGIN=5; WS_WIDTH=20; WS_HP=0; WEATHER_LEFT=6; CC_RIGHT=2; MOD_PAD=6
       [ -f "$ENV" ] && . "$ENV" || true
 
       render() {
           # GTK adds padding on top of min-height, so we shrink min-height
-          # to keep every module exactly 28px while nudging its content.
-          local mh=$(( 28 - ICON_PAD )); [ "$mh" -lt 0 ] && mh=0
-          local wmh=$(( 28 - 2 * WS_MARGIN )); [ "$wmh" -lt 0 ] && wmh=0
+          # to keep every module exactly 30px while nudging its content.
+          local mh=$(( 30 - ICON_PAD )); [ "$mh" -lt 0 ] && mh=0
+          local wmh=$(( 30 - 2 * WS_MARGIN )); [ "$wmh" -lt 0 ] && wmh=0
           cat > "$FILE" <<CSS
       /* waybar-tune overrides — regenerated, do not edit by hand. */
-      window#waybar #custom-logo, window#waybar #custom-appname,
-      window#waybar #hyprland-workspaces, window#waybar #hyprland-language,
-      window#waybar #pulseaudio, window#waybar #bluetooth,
-      window#waybar #battery, window#waybar #tray, window#waybar #custom-clock,
-      window#waybar #custom-control, window#waybar #custom-power,
-      window#waybar #mpris, window#waybar #custom-sysstats,
-      window#waybar #custom-weather {
+      window#waybar #custom-weather, window#waybar #hyprland-workspaces,
+      window#waybar #hyprland-language, window#waybar #custom-clock,
+      window#waybar #custom-volume, window#waybar #tray,
+      window#waybar #battery, window#waybar #custom-cc {
           padding-left: ''${MOD_PAD}px;
           padding-right: ''${MOD_PAD}px;
       }
-      window#waybar #custom-logo    { padding-left: ''${LOGO_LEFT}px; }
-      window#waybar #custom-appname { padding-left: ''${APP_LEFT}px; }
+      window#waybar #custom-weather { padding-left: ''${WEATHER_LEFT}px; }
+      window#waybar #custom-cc      { padding-right: ''${CC_RIGHT}px; }
 
-      window#waybar #custom-logo, window#waybar #bluetooth,
-      window#waybar #custom-control, window#waybar #custom-power,
-      window#waybar #custom-appname, window#waybar #pulseaudio,
-      window#waybar #battery, window#waybar #hyprland-language, window#waybar #custom-clock,
-      window#waybar #mpris, window#waybar #custom-sysstats,
-      window#waybar #custom-weather {
+      window#waybar #custom-weather, window#waybar #hyprland-language,
+      window#waybar #custom-clock, window#waybar #custom-volume,
+      window#waybar #tray, window#waybar #battery, window#waybar #custom-cc {
           min-height: ''${mh}px;
           padding-top: ''${ICON_PAD}px;
       }
@@ -442,8 +341,8 @@ in
           padding: 0 ''${WS_HP}px;
       }
       CSS
-          printf 'ICON_PAD=%s\nWS_MARGIN=%s\nWS_WIDTH=%s\nWS_HP=%s\nLOGO_LEFT=%s\nAPP_LEFT=%s\nMOD_PAD=%s\n' \
-              "$ICON_PAD" "$WS_MARGIN" "$WS_WIDTH" "$WS_HP" "$LOGO_LEFT" "$APP_LEFT" "$MOD_PAD" > "$ENV"
+          printf 'ICON_PAD=%s\nWS_MARGIN=%s\nWS_WIDTH=%s\nWS_HP=%s\nWEATHER_LEFT=%s\nCC_RIGHT=%s\nMOD_PAD=%s\n' \
+              "$ICON_PAD" "$WS_MARGIN" "$WS_WIDTH" "$WS_HP" "$WEATHER_LEFT" "$CC_RIGHT" "$MOD_PAD" > "$ENV"
           pkill -SIGUSR2 -x waybar 2>/dev/null || true
       }
 
@@ -474,13 +373,13 @@ in
           local sel key
           while true; do
               sel=$(printf '%s\n' \
-                  "ICON_PAD   icons/text up-down  = $ICON_PAD" \
-                  "WS_MARGIN  ws buttons up-down = $WS_MARGIN" \
-                  "WS_WIDTH   ws button width    = $WS_WIDTH" \
-                  "WS_HP      ws button horiz    = $WS_HP" \
-                  "LOGO_LEFT  logo left pad      = $LOGO_LEFT" \
-                  "APP_LEFT   appname left pad   = $APP_LEFT" \
-                  "MOD_PAD    module horiz pad   = $MOD_PAD" \
+                  "ICON_PAD     icons/text up-down  = $ICON_PAD" \
+                  "WS_MARGIN    ws buttons up-down = $WS_MARGIN" \
+                  "WS_WIDTH     ws button width    = $WS_WIDTH" \
+                  "WS_HP        ws button horiz    = $WS_HP" \
+                  "WEATHER_LEFT weather left pad   = $WEATHER_LEFT" \
+                  "CC_RIGHT     cc icon right pad  = $CC_RIGHT" \
+                  "MOD_PAD      module horiz pad   = $MOD_PAD" \
                   "reset" \
                   "quit" \
                   | rofi -dmenu -i -p "waybar-tune") || break
@@ -489,7 +388,7 @@ in
               case "$key" in
                   reset) reset_all ;;
                   quit)  break ;;
-                  ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|LOGO_LEFT|APP_LEFT|MOD_PAD) step "$key" ;;
+                  ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|WEATHER_LEFT|CC_RIGHT|MOD_PAD) step "$key" ;;
                   *) break ;;
               esac
           done
@@ -502,7 +401,7 @@ in
           set)   key=''${2:?usage: waybar-tune set KEY VALUE}
                  val=''${3:?usage: waybar-tune set KEY VALUE}
                  case "$key" in
-                     ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|LOGO_LEFT|APP_LEFT|MOD_PAD)
+                     ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|WEATHER_LEFT|CC_RIGHT|MOD_PAD)
                          [[ "$val" =~ ^-?[0-9]+$ ]] || { echo "waybar-tune: value must be an integer" >&2; exit 1; }
                          printf -v "$key" '%s' "$val"; render ;;
                      *) echo "waybar-tune: unknown key '$key'" >&2; exit 1 ;;
@@ -510,7 +409,7 @@ in
           bump)  key=''${2:?usage: waybar-tune bump KEY N}
                  d=''${3:?usage: waybar-tune bump KEY N}
                  case "$key" in
-                     ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|LOGO_LEFT|APP_LEFT|MOD_PAD)
+                     ICON_PAD|WS_MARGIN|WS_WIDTH|WS_HP|WEATHER_LEFT|CC_RIGHT|MOD_PAD)
                          printf -v "$key" '%d' "$(( ''${!key} + d ))"; render ;;
                      *) echo "waybar-tune: unknown key '$key'" >&2; exit 1 ;;
                  esac ;;

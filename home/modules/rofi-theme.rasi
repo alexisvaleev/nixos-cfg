@@ -1,46 +1,11 @@
+/* Palette comes from matugen -> ~/.config/theme/colors.rasi, regenerated
+   by wallpaper.sh after every pick. Defines @bg-col, @bg-col-light,
+   @border-col, @selected-col, @text-col, @subtext-col, @urgent-col,
+   @accent plus rofi's own color variables. */
+@import "~/.config/theme/colors.rasi"
+
 * {
-    bg-col: #14141b;
-    bg-col-light: #1c1c26;
-    border-col: #a78bfa;
-    selected-col: #25252f;
-    text-col: #c8c8d4;
-    subtext-col: #8b8b9a;
-    urgent-col: #f472b6;
-    accent: #c4b5fd;
     font: "JetBrainsMono Nerd Font 11";
-
-    /* Override Rofi 2.0 internal variables.
-       NOTE: literal hex values — rofi does NOT resolve var() chains
-       inside variable definitions, so `background: var(bg-col)` breaks. */
-    background: #14141b;
-    foreground: #c8c8d4;
-    lightbg: #25252f;
-    lightfg: #8b8b9a;
-    red: #f472b6;
-    blue: #a78bfa;
-    green: #c4b5fd;
-    yellow: #c4b5fd;
-
-    normal-background: #14141b;
-    normal-foreground: #c8c8d4;
-    urgent-background: #14141b;
-    urgent-foreground: #f472b6;
-    active-background: #14141b;
-    active-foreground: #c4b5fd;
-
-    selected-normal-background: #25252f;
-    selected-normal-foreground: #c4b5fd;
-    selected-urgent-background: #f472b6;
-    selected-urgent-foreground: #14141b;
-    selected-active-background: #a78bfa;
-    selected-active-foreground: #14141b;
-
-    alternate-normal-background: #14141b;
-    alternate-normal-foreground: #c8c8d4;
-    alternate-urgent-background: #14141b;
-    alternate-urgent-foreground: #f472b6;
-    alternate-active-background: #14141b;
-    alternate-active-foreground: #c4b5fd;
 }
 
 window {

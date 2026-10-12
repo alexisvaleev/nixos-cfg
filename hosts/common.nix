@@ -125,6 +125,8 @@ in
   # ─── Locale / Time ──────────────────────────────────────────────────
   time.timeZone = "Asia/Novosibirsk";
   i18n.defaultLocale = "en_US.UTF-8";
+  # Russian names for dates etc. (waybar clock tooltip, calendars).
+  i18n.extraLocales = [ "ru_RU.UTF-8/UTF-8" ];
 
   # ─── User ───────────────────────────────────────────────────────────
   users.users.blessed = {
@@ -185,6 +187,10 @@ in
       };
     };
   };
+
+  # UPower daemon — needed for Bluetooth headset battery levels
+  # (waybar volume tooltip) and the laptop battery module.
+  services.upower.enable = true;
 
   # ─── Bluetooth ──────────────────────────────────────────────────────
   hardware.bluetooth.enable = true;

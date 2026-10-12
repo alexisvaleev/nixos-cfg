@@ -15,6 +15,8 @@ let
     moon      = nf "f186";  # nf-fa-moon
     coffee    = nf "f0f4";  # nf-fa-coffee
     netmenu   = nf "f6ff";  # nf-fa-network_wired
+    proxy     = nf "f132";  # nf-fa-shield
+    record    = nf "f192";  # nf-fa-circle_dot (record indicator)
   };
 
   cfg = {
@@ -38,7 +40,6 @@ let
     control-center-width = 360;
     control-center-height = -1;
     notification-window-width = 360;
-    notification-window-preferred-output = "eDP-1";
     notification-icon-size = 48;
     notification-inline-replies = true;
     notification-body-image-height = 100;
@@ -77,6 +78,15 @@ let
       "buttons-grid" = {
         buttons-per-row = 3;
         actions = [
+          # row 1 — connectivity
+          {
+            label = "${ic.proxy}";
+            type = "toggle";
+            active = false;
+            command = "$HOME/.config/swaync/proxy-toggle.sh";
+            update-command = "pgrep -x v2rayN >/dev/null && echo true || echo false";
+            tooltip = "Proxy (v2rayN)";
+          }
           {
             label = "${ic.wifi}";
             type = "toggle";
@@ -91,14 +101,7 @@ let
             command = "networkmanager_dmenu";
             tooltip = "Network menu";
           }
-          {
-            label = "${ic.bluetooth}";
-            type = "toggle";
-            active = false;
-            command = "$HOME/.config/swaync/bt-toggle.sh";
-            update-command = "$HOME/.config/swaync/bt-state.sh";
-            tooltip = "Bluetooth";
-          }
+          # row 2 — session behaviour
           {
             label = "${ic.moon}";
             type = "toggle";
@@ -116,22 +119,27 @@ let
             tooltip = "Caffeine";
           }
           {
-            label = "${ic.audio}";
-            type = "normal";
-            command = "pavucontrol";
-            tooltip = "Audio devices";
+            label = "${ic.record}";
+            type = "toggle";
+            active = false;
+            command = "$HOME/.config/hypr/scripts/record.sh";
+            update-command = "pgrep -x wf-recorder >/dev/null && echo true || echo false";
+            tooltip = "Screen record";
+          }
+          # row 3 — devices & session
+          {
+            label = "${ic.bluetooth}";
+            type = "toggle";
+            active = false;
+            command = "$HOME/.config/swaync/bt-toggle.sh";
+            update-command = "$HOME/.config/swaync/bt-state.sh";
+            tooltip = "Bluetooth";
           }
           {
             label = "${ic.lock}";
             type = "normal";
             command = "hyprlock";
             tooltip = "Lock screen";
-          }
-          {
-            label = "${ic.gear}";
-            type = "normal";
-            command = "sh -c 'hyprctl reload && notify-send Hyprland reloaded'";
-            tooltip = "Reload Hyprland";
           }
           {
             label = "${ic.power}";
@@ -184,7 +192,7 @@ in
     .control-center {
       background: alpha(@bg, 0.9);
       color: @text;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid alpha(@purple, 0.2);
       padding: 8px;
     }
@@ -196,7 +204,7 @@ in
     .widget {
       margin: 6px;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
       background: alpha(@surface, 0.95);
     }
 
@@ -207,7 +215,7 @@ in
 
     .widget-title > button {
       margin-left: 8px;
-      border-radius: 10px;
+      border-radius: 12px;
       background: @surface;
       color: @text;
     }
@@ -222,7 +230,7 @@ in
     }
 
     .widget-dnd switch {
-      border-radius: 10px;
+      border-radius: 12px;
     }
 
     .widget-dnd switch:checked {
@@ -238,7 +246,7 @@ in
       background-color: @surface;
       color: @text;
       border: 1px solid transparent;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 8px;
       margin: 2px;
       min-width: 0;
@@ -282,16 +290,16 @@ in
     .per-app-volume {
       background-color: @surface;
       margin: 8px 0 0;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 8px;
     }
 
     .widget-mpris .widget-mpris-player {
-      border-radius: 10px;
+      border-radius: 12px;
     }
 
     .notification-row .notification-background .notification {
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid alpha(@purple, 0.2);
       background: alpha(@surface, 0.95);
       color: @text;
@@ -312,6 +320,22 @@ in
       color: @bg;
     }
   '';
+
+  # Proxy toggle — v2rayN as a whole. setsid + fd detach so the GUI
+  # process can't hold a pipe open and hang SwayNC's click handler
+  # (same failure mode the caffeine/nightlight scripts already avoid).
+  xdg.configFile."swaync/proxy-toggle.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      if [ "$SWAYNC_TOGGLE_STATE" = "true" ]; then
+        pgrep -x v2rayN >/dev/null || \
+          setsid ${pkgs.v2rayn}/bin/v2rayN </dev/null >/dev/null 2>&1 &
+      else
+        pkill -x v2rayN 2>/dev/null || true
+      fi
+    '';
+  };
 
   # Helper scripts for Wi-Fi / Bluetooth toggles (avoids messy inline quoting).
   xdg.configFile."swaync/wifi-toggle.sh" = {

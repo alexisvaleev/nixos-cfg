@@ -17,7 +17,7 @@ in
     window#osd {
       background: alpha(@bg, 0.95);
       border: 1px solid alpha(@purple, 0.2);
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 12px 38px alpha(@bg_dark, 0.5);
       color: @text;
       padding: 0;

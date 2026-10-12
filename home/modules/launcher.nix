@@ -51,11 +51,11 @@
     wifi_chars = ▂▄▆█
 
     [dmenu_colors]
-    separator = #8b8b9a
-    foreground = #c8c8d4
-    background = #14141bcc
+    separator = #6b6b7a
+    foreground = #e6e6f0
+    background = #0f0f15cc
     selected_background = #a78bfa
-    selected_foreground = #14141b
+    selected_foreground = #0f0f15
 
     [dmenu_font]
     dmenu_font = JetBrainsMono Nerd Font 11
