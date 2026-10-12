@@ -211,7 +211,7 @@
         ([$w.hourly[].chanceofrain | tonumber] | max) as $rain |
         ($mid.windspeedKmph // $c.windspeedKmph) as $wind |
         {
-          text: "\(glyph($c.weatherCode)) \($c.temp_C)°",
+          text: "<span font_family=\"JetBrainsMono Nerd Font\">\(glyph($c.weatherCode))</span> \($c.temp_C)°",
           tooltip: "Сейчас: \($c.temp_C)°, \($cdesc)\nСегодня: \($w.mintempC)…\($w.maxtempC)°, \($wdesc)\nДождь: \($rain)% · Ветер: \($wind) км/ч"
         } | @json' 2>/dev/null || echo '{"text":""}'
     '';

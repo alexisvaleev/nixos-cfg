@@ -55,7 +55,7 @@ in
         exec = "~/.config/hypr/scripts/weather.sh";
         "return-type" = "json";
         interval = 1800;
-        max-length = 30;
+        markup = true;
       };
 
       "hyprland/workspaces" = {
@@ -96,6 +96,7 @@ in
         on-scroll-up = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
         on-scroll-down = "${pkgs.wireplumber}/bin/wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
         tooltip = true;
+        markup = true;
       };
 
       "tray" = {
@@ -105,9 +106,9 @@ in
       };
 
       "battery" = {
-        format = "{icon} {capacity}%";
-        format-charging = "${ic.batCharge} {capacity}%";
-        format-full = "{icon} {capacity}%";
+        format = "<span font_family='JetBrainsMono Nerd Font'>{icon}</span> {capacity}%";
+        format-charging = "<span font_family='JetBrainsMono Nerd Font'>${ic.batCharge}</span> {capacity}%";
+        format-full = "<span font_family='JetBrainsMono Nerd Font'>{icon}</span> {capacity}%";
         format-icons = ic.bat;
         states = {
           warning = 30;
@@ -119,7 +120,8 @@ in
       # NixOS glyph — the single accent of the right capsule.
       # Opens the control center.
       "custom/cc" = {
-        format = "${ic.logo}";
+        format = "<span font_family='JetBrainsMono Nerd Font'>${ic.logo}</span>";
+        markup = true;
         on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -t";
         tooltip = false;
       };
@@ -164,13 +166,6 @@ in
           background-color: transparent;
           color: @subtext;
           min-height: 30px;
-      }
-
-      /* Icon-bearing modules resolve glyphs from the nerd fonts;
-         Inter's own PUA icons must not win. */
-      #custom-weather, #custom-volume, #language,
-      #battery, #custom-cc {
-          font-family: "Iosevka Nerd Font Propo", "JetBrainsMono Nerd Font", "Inter", "Noto Sans";
       }
 
       #custom-weather { padding-right: 8px; }
@@ -289,8 +284,9 @@ in
           [ -n "$bat" ] && tip="headphones: $bat"
       fi
 
-      printf '{"text":"%s %s%%","tooltip":"%s","class":"%s"}\n' \
-          "$icon" "$pct" "$tip" "$class"
+      text="<span font_family='JetBrainsMono Nerd Font'>$icon</span> $pct%"
+      ${pkgs.jq}/bin/jq -nc --arg t "$text" --arg tip "$tip" --arg c "$class" \
+          '{text:$t, tooltip:$tip, class:$c}'
     '';
   };
 
