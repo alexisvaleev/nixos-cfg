@@ -110,6 +110,26 @@ in
   services.xserver.videoDrivers = lib.mkDefault [ "modesetting" ];
   hardware.graphics.enable = true;
 
+  # ─── NVIDIA variant (boot-menu specialisation) ──────────────────────
+  # Same config plus the proprietary driver, exposed as an extra
+  # systemd-boot entry "NixOS - nvidia". The entry is safe on machines
+  # WITHOUT NVIDIA hardware: the nvidia modules find no device, X falls
+  # back to modesetting (it's second in videoDrivers) and the session
+  # comes up normally. So the SSD can roam freely; picking the nvidia
+  # entry once is enough everywhere.
+  specialisation."nvidia" = {
+    inheritParentConfig = true;
+    configuration = {
+      services.xserver.videoDrivers = [ "nvidia" "modesetting" ];
+      hardware.nvidia = {
+        modesetting.enable = true;
+        # Turing (RTX 20xx) and newer are supported by the open modules.
+        open = true;
+        nvidiaSettings = false;
+      };
+    };
+  };
+
   # ─── Steam (also turns on 32-bit graphics libs for Proton/native games) ─
   programs.steam = {
     enable = true;
