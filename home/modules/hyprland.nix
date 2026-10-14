@@ -167,9 +167,10 @@ in
         misc = {
             force_default_wallpaper = -1,
             disable_hyprland_logo   = false,
-            # honour activation requests: clicking a Telegram (or any)
-            # notification jumps to that app's workspace + window
-            focus_on_activate = true,
+            # apps may NOT steal focus via activation requests (Telegram
+            # abused it on every message); notification clicks are
+            # re-implemented by notify-click-jump.py / devin-notify.sh
+            focus_on_activate = false,
         },
     })
 
@@ -341,13 +342,12 @@ in
         opacity = 0.95,
     })
 
-    -- Telegram requests activation on every incoming message, which with
-    -- focus_on_activate would yank focus on arrival. Suppress it; clicks
-    -- on its notifications are handled by notify-click-jump.py instead.
+    -- Belt & braces: even if something enables activation later,
+    -- Telegram's requests stay suppressed (it fires one per message).
     hl.window_rule({
         name  = "telegram-suppress-activate",
         match = { class = "org.telegram.desktop" },
-        suppress_event = "activate",
+        suppress_event = "activate activatefocus urgent",
     })
 
     -- Frosted glass blur for the macOS-style Waybar layer.
