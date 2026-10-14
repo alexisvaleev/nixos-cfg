@@ -167,6 +167,9 @@ in
         misc = {
             force_default_wallpaper = -1,
             disable_hyprland_logo   = false,
+            # honour activation requests: clicking a Telegram (or any)
+            # notification jumps to that app's workspace + window
+            focus_on_activate = true,
         },
     })
 
