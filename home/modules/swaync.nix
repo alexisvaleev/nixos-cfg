@@ -129,11 +129,9 @@ let
           # row 3 — devices & session
           {
             label = "${ic.bluetooth}";
-            type = "toggle";
-            active = false;
-            command = "$HOME/.config/swaync/bt-toggle.sh";
-            update-command = "$HOME/.config/swaync/bt-state.sh";
-            tooltip = "Bluetooth";
+            type = "normal";
+            command = "$HOME/.config/swaync/bt-menu.sh";
+            tooltip = "Bluetooth devices";
           }
           {
             label = "${ic.lock}";
@@ -383,6 +381,66 @@ in
       #!/usr/bin/env bash
       state=$(bluetoothctl show 2>/dev/null | grep Powered | awk '{print $2}')
       [ "$state" = "yes" ] && echo true || echo false
+    '';
+  };
+
+  # Bluetooth device menu (rofi) — the control-center tile opens this.
+  # Known devices listed with connect state; picking one toggles the
+  # connection. "Scan & pair" runs a timed scan then pairs+trusts+connects
+  # the picked device. Works for audio/mice (JustWorks); PIN devices can
+  # still be paired via blueman (entry at the bottom).
+  xdg.configFile."swaync/bt-menu.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      bt=bluetoothctl
+
+      power=$($bt show 2>/dev/null | awk '/Powered/{print $2; exit}')
+      if [ "$power" != "yes" ]; then
+          sel=$(printf ' Turn Bluetooth on\n' | rofi -dmenu -i -p "Bluetooth off")
+          [ -n "$sel" ] && $bt power on >/dev/null 2>&1
+          exit 0
+      fi
+
+      list() {
+          $bt devices 2>/dev/null | while read -r _ mac name; do
+              [ -z "$mac" ] && continue
+              if $bt info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+                  st="●"; else st="○"; fi
+              printf '%s %s\t%s\n' "$st" "$name" "$mac"
+          done
+      }
+
+      sel=$({ list; printf '──────────────────\n  Scan & pair new…\n  Devices manager (blueman)\n  Turn Bluetooth off\n'; } \
+              | rofi -dmenu -i -p "Bluetooth") || exit 0
+      [ -n "$sel" ] || exit 0
+
+      case "$sel" in
+          *"Scan & pair"*)
+              $bt scan on >/dev/null 2>&1 &
+              scanpid=$!
+              sleep 10
+              $bt scan off >/dev/null 2>&1; kill $scanpid 2>/dev/null
+              newdev=$( $bt devices 2>/dev/null \
+                  | rofi -dmenu -i -p "Pair with" ) || exit 0
+              [ -n "$newdev" ] || exit 0
+              mac=$(printf '%s' "$newdev" | awk '{print $2}')
+              [ -n "$mac" ] || exit 0
+              $bt pair "$mac" >/dev/null 2>&1
+              $bt trust "$mac" >/dev/null 2>&1
+              $bt connect "$mac" >/dev/null 2>&1
+              ;;
+          *"blueman"*) blueman-manager >/dev/null 2>&1 & ;;
+          *"Turn Bluetooth off"*) $bt power off >/dev/null 2>&1 ;;
+          ─*)  exit 0 ;;
+          *)   mac=''${sel##*$'\t'}
+               [ -n "$mac" ] || exit 0
+               if $bt info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+                   $bt disconnect "$mac" >/dev/null 2>&1
+               else
+                   $bt connect "$mac" >/dev/null 2>&1
+               fi ;;
+      esac
     '';
   };
 
