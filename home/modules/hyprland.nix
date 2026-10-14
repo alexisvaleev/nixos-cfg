@@ -341,6 +341,15 @@ in
         opacity = 0.95,
     })
 
+    -- Telegram requests activation on every incoming message, which with
+    -- focus_on_activate would yank focus on arrival. Suppress it; clicks
+    -- on its notifications are handled by notify-click-jump.py instead.
+    hl.window_rule({
+        name  = "telegram-suppress-activate",
+        match = { class = "org.telegram.desktop" },
+        suppress_event = "activate",
+    })
+
     -- Frosted glass blur for the macOS-style Waybar layer.
     hl.layer_rule({
         match = { namespace = "^waybar$" },
@@ -396,6 +405,9 @@ in
       nohup ${pkgs.quickshell}/bin/qs -c player >/dev/null 2>&1 &
       nohup wl-paste --type text  --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
       nohup wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store >/dev/null 2>&1 &
+      # Notification click-jumper for activation-suppressed apps (Telegram).
+      pgrep -f 'notify-click-jump.py' >/dev/null 2>&1 || \
+          nohup ${pkgs.python3}/bin/python3 "$HOME/.local/bin/notify-click-jump.py" >/dev/null 2>&1 &
       nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
       # Proxy helpers. v2rayN lives in the HM profile; TgWsProxy is a
       # hand-managed PyInstaller binary in ~/.local/bin which is NOT on
