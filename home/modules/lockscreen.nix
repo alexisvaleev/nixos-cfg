@@ -72,6 +72,19 @@ in
         valign = center
     }
 
+    # Keyboard layout badge (EN/RU) right above the password field —
+    # main keyboard's active_keymap is the authoritative layout source.
+    label {
+        monitor =
+        text = cmd[update:300] hyprctl devices -j | jq -r '.keyboards[] | select(.main==true) | .active_keymap' | sed 's/English.*/EN/;s/Russian.*/RU/'
+        color = $purple
+        font_size = 16
+        font_family = Iosevka Nerd Font
+        position = 0, -110
+        halign = center
+        valign = center
+    }
+
     input-field {
         monitor =
         size = 300, 50
