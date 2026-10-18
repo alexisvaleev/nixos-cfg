@@ -157,7 +157,9 @@ in
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" ];
     shell = pkgs.zsh;
-    hashedPassword = "$6$HvbFHwfqX5AmhLzQ$ZvH0EP4WPM9nkzxzmdrq7JCOyY1yphCsqlQBrwjEZnjCg4GGWArEJ4AIw8DMTH9T1/ePkEA8NboGC1x2t8sk9/";
+    # No declarative password: this repo is public, so the hash can't
+    # live here. The live password is managed in /etc/shadow (mutable
+    # users); a hashedPasswordFile outside git may be added later.
   };
 
   # ─── Shells ─────────────────────────────────────────────────────────
