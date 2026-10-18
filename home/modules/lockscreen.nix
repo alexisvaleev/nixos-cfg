@@ -7,6 +7,30 @@ let
   wall = "${home}/.local/share/backgrounds/wallpaper.jpg";
 in
 {
+  # Idle-inhibits whenever audio is playing (any player/browser, any
+  # window mode) so videos don't trigger the hypridle lock/DPMS timers.
+  # systemd user service (not autostart.sh): the daemon is a wayland
+  # client and dies with the compositor — PartOf+Restart respawns it
+  # with every graphical session.
+  home.packages = [ pkgs.sway-audio-idle-inhibit ];
+
+  # default.target (not graphical-session.target — Hyprland without UWSM
+  # doesn't raise it): starts at login, Restart=always covers crashes and
+  # session teardown killing the process tree.
+  systemd.user.services.sway-audio-idle-inhibit = {
+    Unit = {
+      Description = "Inhibit idle while audio is playing";
+      After = [ "pipewire.service" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+      Restart = "always";
+      RestartSec = 3;
+      StartLimitIntervalSec = 0;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   xdg.configFile."hypr/hyprlock.conf".text = ''
     source = ${home}/.config/theme/colors.conf
 
@@ -122,11 +146,8 @@ in
         inhibit_sleep = 3
     }
 
-    listener {
-        timeout = 600
-        on-timeout = loginctl lock-session
-        ignore_inhibit = true
-    }
+    # No auto-lock on idle — explicit `loginctl lock-session` / keybind
+    # still locks on demand. Only the DPMS timer remains.
 
     listener {
         timeout = 900

@@ -167,9 +167,9 @@ in
         misc = {
             force_default_wallpaper = -1,
             disable_hyprland_logo   = false,
-            # apps may NOT steal focus via activation requests (Telegram
-            # abused it on every message); notification clicks are
-            # re-implemented by notify-click-jump.py / devin-notify.sh
+            -- apps may NOT steal focus via activation requests (Telegram
+            -- abused it on every message); notification clicks are
+            -- re-implemented by notify-click-jump.py / devin-notify.sh
             focus_on_activate = false,
         },
     })
@@ -408,6 +408,8 @@ in
       # Notification click-jumper for activation-suppressed apps (Telegram).
       pgrep -f 'notify-click-jump.py' >/dev/null 2>&1 || \
           nohup ${pkgs.python3}/bin/python3 "$HOME/.local/bin/notify-click-jump.py" >/dev/null 2>&1 &
+      # sway-audio-idle-inhibit runs as a systemd user service
+      # (lockscreen.nix) — survives compositor/session restarts.
       nohup ${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
       # Proxy helpers. v2rayN lives in the HM profile; TgWsProxy is a
       # hand-managed PyInstaller binary in ~/.local/bin which is NOT on
