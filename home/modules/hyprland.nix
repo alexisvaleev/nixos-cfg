@@ -392,7 +392,7 @@ in
       ) >/dev/null 2>&1 &
 
       # Then the rest of the desktop.
-      pgrep -f 'waybar-wrapped' >/dev/null 2>&1 || \
+      pgrep -x '.waybar-wrapped' >/dev/null 2>&1 || \
           nohup waybar                          >/dev/null 2>&1 &
       nohup ~/.config/hypr/scripts/sni-fixer.sh >/dev/null 2>&1 &
       nohup nm-applet --indicator               >/dev/null 2>&1 &

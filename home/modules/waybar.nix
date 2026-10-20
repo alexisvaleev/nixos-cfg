@@ -22,6 +22,7 @@ let
     bat        = [ (nf "f244") (nf "f243") (nf "f242") (nf "f241") (nf "f240") ];
     batCharge  = nf "f0e7";  # nf-fa-bolt
     batFull    = nf "f240";  # nf-fa-battery_full
+    batPlug    = nf "f1e6";  # nf-fa-plug — plugged in at 100%
     # system
     clock      = nf "f017";  # nf-fa-clock
     power      = nf "f011";  # nf-fa-power_off
@@ -48,8 +49,8 @@ in
 
       # Two floating capsules: weather + workspaces left; lang, clock,
       # volume, tray, battery, control-center icon right. Nothing else.
-      modules-left = [ "custom/weather" "hyprland/workspaces" ];
-      modules-right = [ "hyprland/language" "custom/clock" "custom/volume" "tray" "battery" "custom/cc" ];
+      modules-left = [ "custom/clock" "hyprland/workspaces" ];
+      modules-right = [ "hyprland/language" "custom/weather" "custom/volume" "tray" "battery" "custom/cc" ];
 
       "custom/weather" = {
         exec = "~/.config/hypr/scripts/weather.sh";
@@ -106,9 +107,12 @@ in
       };
 
       "battery" = {
-        format = "<span font_family='JetBrainsMono Nerd Font'>{icon}</span> {capacity}%";
-        format-charging = "<span font_family='JetBrainsMono Nerd Font'>${ic.batCharge}</span> {capacity}%";
-        format-full = "<span font_family='JetBrainsMono Nerd Font'>{icon}</span> {capacity}%";
+        format = "<span font_family='JetBrainsMono Nerd Font'>{icon}</span>   {capacity}%";
+        format-charging = "<span font_family='JetBrainsMono Nerd Font'>${ic.batCharge}</span>   {capacity}%";
+        # ThinkPad reports "Full" (not "Plugged") at 100% on AC — show
+        # the plug icon for both full/plugged states.
+        format-full = "<span font_family='JetBrainsMono Nerd Font'>${ic.batPlug}</span>   {capacity}%";
+        format-plugged = "<span font_family='JetBrainsMono Nerd Font'>${ic.batPlug}</span>   {capacity}%";
         format-icons = ic.bat;
         states = {
           warning = 30;
