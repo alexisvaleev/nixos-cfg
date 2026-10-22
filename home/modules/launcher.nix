@@ -18,8 +18,11 @@
       display-run = "Run";
       sidebar-mode = true;
       cycle = true;
-      matching = "fuzzy";
-      sort = true;
+      # Substring matching: only literal hits survive the filter.
+      # No re-sorting — matches keep drun's base order, which is
+      # launch-frequency/recency (druncache): most-used on top.
+      matching = "normal";
+      sort = false;
       scroll-method = 0;
     };
   };
