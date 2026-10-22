@@ -17,10 +17,14 @@ in
   # default.target (not graphical-session.target — Hyprland without UWSM
   # doesn't raise it): starts at login, Restart=always covers crashes and
   # session teardown killing the process tree.
+  # Order after pipewire-pulse (not just pipewire): the daemon aborts
+  # if the PulseAudio-compat socket isn't accepting yet — it crashed
+  # every boot on that race.
   systemd.user.services.sway-audio-idle-inhibit = {
     Unit = {
       Description = "Inhibit idle while audio is playing";
-      After = [ "pipewire.service" ];
+      After = [ "pipewire.service" "pipewire-pulse.service" ];
+      Wants = [ "pipewire-pulse.service" ];
     };
     Service = {
       ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
