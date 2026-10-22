@@ -36,10 +36,20 @@ in
       "..." = "cd ../..";
     };
 
+    # ~/.local/bin holds the Devin CLI symlink + personal scripts —
+    # .zshenv so every zsh (incl. non-interactive) sees them.
+    envExtra = ''
+      export PATH="$HOME/.local/bin:$PATH"
+    '';
+
     initContent = ''
-      # Show system info on every new interactive terminal
+      # Show system info on every new interactive terminal.
+      # fastfetch queries the kitty version via escape codes; the reply
+      # can race ahead and land in the input buffer as garbage —
+      # drain pending input right after it finishes.
       if [[ -o interactive ]]; then
         fastfetch 2>/dev/null
+        read -s -k 4096 -t 0.1 </dev/tty 2>/dev/null || true
       fi
 
       # opencode through v2rayN proxy when it's running (API endpoints
@@ -52,6 +62,18 @@ in
           command opencode "$@"
         else
           command opencode "$@"
+        fi
+      }
+
+      # devin CLI: same proxy rule — API calls fail on this ISP without it.
+      devin() {
+        if ss -tln 2>/dev/null | grep -q ':10808'; then
+          HTTPS_PROXY=http://127.0.0.1:10808 \
+          HTTP_PROXY=http://127.0.0.1:10808 \
+          NO_PROXY=localhost,127.0.0.1 \
+          command devin "$@"
+        else
+          command devin "$@"
         fi
       }
 
@@ -108,6 +130,10 @@ in
       python = {
         symbol = " ";
         style = "${theme.yellow}";
+        # Only real project markers — a stray *.py in ~ shouldn't
+        # make the prompt show a python version forever.
+        detect_extensions = [ ];
+        detect_files = [ "pyproject.toml" "requirements.txt" "Pipfile" ".python-version" ];
       };
     };
   };
@@ -119,15 +145,15 @@ in
       "--height 40%"
       "--layout=reverse"
       "--border"
-      "--color=bg+:${lib.strings.removePrefix "#" theme.surface}"
-      "--color=bg:${lib.strings.removePrefix "#" theme.bg}"
-      "--color=fg:${lib.strings.removePrefix "#" theme.text}"
-      "--color=hl:${lib.strings.removePrefix "#" theme.purple}"
-      "--color=hl+:${lib.strings.removePrefix "#" theme.purple}"
-      "--color=info:${lib.strings.removePrefix "#" theme.subtext}"
-      "--color=prompt:${lib.strings.removePrefix "#" theme.purple}"
-      "--color=pointer:${lib.strings.removePrefix "#" theme.purple}"
-      "--color=marker:${lib.strings.removePrefix "#" theme.green}"
+      "--color=bg+:${theme.surface}"
+      "--color=bg:${theme.bg}"
+      "--color=fg:${theme.text}"
+      "--color=hl:${theme.purple}"
+      "--color=hl+:${theme.purple}"
+      "--color=info:${theme.subtext}"
+      "--color=prompt:${theme.purple}"
+      "--color=pointer:${theme.purple}"
+      "--color=marker:${theme.green}"
     ];
   };
 }
