@@ -22,6 +22,10 @@
     # NETFLIX, FASTLY, PRIVATE) that routing rules like "geoip:facebook" expect.
     # The official v2fly v2ray-geoip only has country codes and breaks the core.
     v2ray-rules-dat
+    # office suite — MS Office replacement: Writer/Calc/Impress,
+    # opens .doc/.docx/.xls/.ppt. hunspell-ru = Russian spellcheck.
+    libreoffice
+    hunspellDicts.ru_RU
     # system info
     fastfetch
     # rofi-based menus for network & bluetooth (clickable from waybar)
